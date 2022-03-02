@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+  <meta charset="utf-8">
+  <title>JS Bin</title>
+<style id="jsbin-css">
+path { stroke: red; fill: none; stroke-width:2; opacity: 0.4}
+</style>
+</head>
+<body>
+  <div id="test"></div>
+<script id="jsbin-javascript">
+var w = innerWidth,
+    h = innerHeight,
+    d = Math.min(w,h*1.5),
+    r0 = d * 0.2,
+    r1 = d * 0.45,
+    cx = w * 0.5,
+    cy = d * 0.5,
+    dots = 435,
+    rows = 11,
+    radii = d3.range(rows).map(function(i) { return r0 + i * ((r1 - r0) / rows); }),
+    phi = Math.PI * 1.1,
+    total_l = 0;
+
+radii.forEach(function(r) { total_l += phi * r; });
+
+var dot_l = total_l / dots;
+
+var svg = d3.select('#test')
+    .append('svg').attr({ height: h, width: w })
+    .append('g').attr('transform', 'translate('+cx+','+cy+')');
+
+var dots_total = 0;
+
+radii.forEach(function(r, i) {
+  var dot_cnt = i == radii.length-1 ? dots - dots_total : Math.round(phi * r / total_l * dots),
+      arc = Arc(r);
+  svg.append('g').attr('class', 'row')
+    .selectAll('circle')
+    .data(d3.range(0,1.000001, 1/dot_cnt))
+    .enter().append('circle')
+    .attr('transform', function(t) {
+      return 'translate('+arc(t)+')';
+    })
+    .attr('r', Math.min(dot_l*0.5-1, (r1-r0)/rows*0.5-1 ));
+  dots_total += dot_cnt;
+})
+
+console.log("pocet kruhov");
+        console.log($("#test circle").length);
+
+/* // preview arcs
+svg.selectAll('.arc').data(radii)
+    .enter().append('path')
+    .attr('d', function(r) {
+      var arc = Arc(r),
+          p0 = arc(0),
+          p1 = arc(1);
+      return 'M'+p0+'A'+[r,r]+' 0 '+(phi > Math.PI ? 1 : 0)+',1 '+p1;
+    });
+// */
+
+function Arc(r) {
+  return function(t) {
+    var p = t * phi - Math.PI * 0.5 - phi * 0.5;
+    return [Math.cos(p) * r, Math.sin(p) * r];
+  };
+}
+</script>
+
+</body>
+</html>

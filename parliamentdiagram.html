@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Source https://gist.github.com/gka/515a041815df4c37d659 -->
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <meta charset="utf-8">
+    <title>JS Bin</title>
+    <style id="jsbin-css">
+        path {
+            stroke: red;
+            fill: none;
+            stroke-width: 2;
+            opacity: 0.4
+        }
+    </style>
+
+    <style>
+        .row {
+            width: 100%;
+            display: flex;
+        }
+
+        .col {
+            width: 50%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col">A</div>
+        <div class="col" style="min-height: 300px;">
+            <div id="parliament-svg-map"></div>
+        </div>
+    </div>
+    <script id="jsbin-javascript">
+
+        function setUpParliamentDiagramResults() {
+            var parliament_wrapper = $("#parliament-svg-map");
+
+            var w = parliament_wrapper.parent().width(),
+                h = Math.floor(parliament_wrapper.parent().width() * 0.7),
+                d = Math.min(w, h * 1.5),
+                r0 = d * 0.2,
+                r1 = d * 0.45,
+                cx = w * 0.5,
+                cy = d * 0.5,
+                dots = 150,
+                rows = 6,
+                radii = d3.range(rows).map(function (i) { return r0 + i * ((r1 - r0) / rows); }),
+                phi = Math.PI * 1.1,
+                total_l = 0;
+
+            radii.forEach(function (r) { total_l += phi * r; });
+
+            var dot_l = total_l / dots;
+
+            var svg = d3.select('#parliament-svg-map')
+                .append('svg').attr({ height: h, width: w })
+                .append('g').attr("class", "rows-wrapper").attr('transform', 'translate(' + cx + ',' + cy + ')');
+
+            var dots_total = 0;
+            radii.forEach(function (r, i) {
+                var dot_cnt = i == radii.length - 1 ? dots - dots_total : Math.round(phi * r / total_l * dots),
+                    arc = Arc(r);
+
+                // Here is problem with flaoting point numbers, previously was d3.range(0, 1.000001, 1 / dot_cnt) but sometimes gave more points that was allowed    
+                let data = d3.range(0, 1.000001, 1 / (dot_cnt - 1)); // Problem with wrong total count solved here by subscribing 1
+
+                svg.append('g').attr('class', 'row')
+                    .selectAll('circle')
+                    .data(data)
+                    .enter().append('circle')
+                    .attr('transform', function (t) {
+                        return 'translate(' + arc(t) + ')';
+                    })
+                    .attr('class', function (t, index_in_row) {
+                        return 'row-seat-' + (index_in_row + 1) + ' row-' + (i + 1) + ' seat-' + (dots_total + index_in_row + 1);
+                    })
+                    .attr('data-seat', function (t, index_in_row) {
+                        return dots_total + index_in_row + 1;
+                    })
+                    .attr('r', Math.min(dot_l * 0.5 - 1, (r1 - r0) / rows * 0.5 - 1));
+                dots_total += dot_cnt;
+            })
+
+            console.log("pocet kruhov");
+            console.log(JQ("#parliament-svg-map circle").length);
+            console.log(dots_total);
+
+            calcCircleOrderAndLabels();
+        }
+
+        setUpParliamentDiagramResults();
+
+        // preview arcs
+        // svg.selectAll('.arc').data(radii)
+        //     .enter().append('path')
+        //     .attr('d', function (r) {
+        //         var arc = Arc(r),
+        //             p0 = arc(0),
+        //             p1 = arc(1);
+        //         return 'M' + p0 + 'A' + [r, r] + ' 0 ' + (phi > Math.PI ? 1 : 0) + ',1 ' + p1;
+        //     });
+        //
+
+        function Arc(r) {
+            return function (t) {
+                phi = Math.PI * 1.1;
+                var p = t * phi - Math.PI * 0.5 - phi * 0.5;
+                return [Math.cos(p) * r, Math.sin(p) * r];
+            };
+        }
+
+        function getElemBottomLeftCoords(elemOffsets, parentOffsets) {
+            let x1, y1;
+            x1 = elemOffsets.left - parentOffsets.left;
+            y1 = elemOffsets.top - parentOffsets.top;
+            return [x1, y1];
+        }
+
+        function find_angle(A, B, C) {
+            var AB = Math.sqrt(Math.pow(B[0] - A[0], 2) + Math.pow(B[1] - A[1], 2));
+            var BC = Math.sqrt(Math.pow(B[0] - C[0], 2) + Math.pow(B[1] - C[1], 2));
+            var AC = Math.sqrt(Math.pow(C[0] - A[0], 2) + Math.pow(C[1] - A[1], 2));
+            return Math.acos((BC * BC + AB * AB - AC * AC) / (2 * BC * AB));
+        }
+
+        function calcCircleOrderAndLabels() {
+            var canvas = JQ('.rows-wrapper');
+            var canvas_offset = canvas[0].getBoundingClientRect(); // Careful svg g elem has no width, needs to be retrieved by this
+            let canvas_left_bottom = [0, canvas_offset.height]
+            let canvas_bottom_middle = [canvas_offset.width / 2, canvas_offset.height]
+
+            console.log("points", canvas_left_bottom, canvas_bottom_middle);
+            var poitsData = [];
+            $("circle").each(function (i, elem) {
+
+                let circleNumber = i + 1;
+                let self = $(elem);
+
+                let circle_number = self.data("seat");
+                let coords = getElemBottomLeftCoords(self.offset(), canvas_offset);
+                let angle = (find_angle(canvas_left_bottom, canvas_bottom_middle, coords) * 180) / Math.PI
+                poitsData.push({
+                    "angle": angle,
+                    "seat": circleNumber
+                })
+            });
+
+            poitsData.sort((a, b) => b.angle - a.angle);
+            console.log(poitsData); // Sorted 
+        }
+    </script>
+</body>
+
+</html>
