@@ -6,26 +6,65 @@
     import * as d3 from "d3";
 
     var partyResults = [];
+    var electionsStatus = [];
+    var partiesInParliament = [];
+    var config = null;
+    var lookup = {
+        parties: {},
+        candidates: {},
+    };
 
     onMount(async () => {
+        config = (await axios.get("api/config.json")).data;
+        config.parties.forEach((party) => {
+            let partyWithoutCandidates = Object.assign({}, party);
+            delete partyWithoutCandidates.candidates;
+
+            lookup.parties[party["_id"]] = partyWithoutCandidates;
+
+            party.candidates.forEach((candidate) => {
+                lookup.candidates[candidate["_id"]] = candidate;
+            });
+        });
+
         partyResults = await getPartyResults();
-        if (partyResults.length == 0) {
-            alert("No data");
-        }
+        console.log("gere");
+        partyResults.forEach((party, index) => {
+            party.candidates.forEach((candidate, c_index)=> {
+                party.candidates[c_index] = { ...candidate, ...lookup.candidates[candidate.id] };
+            });
+            console.log(party);
+            console.log("merging with", lookup.parties[party.id]);
+            partyResults[index] = { ...party, ...lookup.parties[party.id] };
+
+
+        });
+        console.log("partyResults", partyResults);
+
+        partiesInParliament = partyResults.filter((i) => i.in_parliament);
+        console.log("partiesInParliament", partiesInParliament);
+        electionsStatus = await getElectionsStatus();
+
+        console.log("electionsStatus", electionsStatus);
+
+
         console.log("Loaded");
         renderPartyBarChart(["myChart1", "myChart2"], partyResults);
         renderLineChartVotesInTime("myChart3");
 
         console.log(partyResults);
 
-        console.log("jquery////");
-        console.log(JQ("#parliament-map"));
-
         setUpParliamentDiagramResults();
     });
 
-    function abbr(x) {
-        return x.substring(0, 4);
+    async function getElectionsStatus() {
+        const response = await axios.get(url("/elastic/elections-status"));
+        return response.data.data;
+    }
+
+    function abbr(x, count = 4) {
+        count = (x.length < count) ?  x.length : count;
+        return x.substring(0, count);
     }
 
     function url(path) {
@@ -35,7 +74,7 @@
 
     async function getPartyResults() {
         const response = await axios.post(
-            url("/elastic/get-parties-results"),
+            url("/elastic/get-party-candidate-results"),
             {}
         );
         return response.data;
@@ -125,8 +164,7 @@
 
         var dot_l = total_l / dots;
 
-
-        console.log("Sizes:", h, w)
+        console.log("Sizes:", h, w);
         var svg = d3
             .select("#parliament-map")
             .append("svg")
@@ -239,19 +277,84 @@
             });
         });
 
-        poitsData.sort((a, b) => b.angle - a.angle);
+        poitsData.sort((a, b) => a.angle - b.angle);
         console.log(poitsData); // Sorted
+
+        let seat_index = 0;
+        partiesInParliament.forEach((party) => {
+            let number_of_seats = party.seats;
+            let seated_candidates = party.candidates.slice(0, number_of_seats);
+
+            // Get array of seat number for this party (sorted by lowest angle)
+            let available_seats = poitsData
+                .slice(seat_index, seat_index + number_of_seats)
+                .map((i) => i.seat);
+            // console.log("available_seats", available_seats);
+
+            // Order it by seat number and assign them to seated candiates in ascending order, so candidates with more votes are in the front
+            let available_seats_in_order = available_seats.sort(
+                (a, b) => a - b
+            );
+            seated_candidates.forEach((candidate, i) => {
+                // console.log("Candidate", candidate.name, "seating to seat", available_seats_in_order[i]);
+                JQ(".seat-" + available_seats_in_order[i]).attr(
+                    "data-parliament-member",
+                    candidate.name
+                ).attr('fill', party.color);
+                // console.log(
+                //     JQ(".seat-" + available_seats_in_order[i]).attr(
+                //         "data-parliament-member"
+                //     )
+                // );
+            });
+
+            seat_index += number_of_seats;
+        });
     }
+
+    // function getPartyColor(name) {
+    //     if (lookup.parties){
+    //         console.log(name)
+    //         return lookup.parties[name].color;
+    //     } else {
+    //         return '';
+    //     }
+
+    // }
 </script>
 
 <!-- TODO nejdu mi css -->
 
 <button on:click={renderPartyBarChart}>Load</button>
 
+<div id="overview text-center my-5">
+    <h2 class="text-center">
+        Volebna ucast: {electionsStatus.participation} %
+    </h2>
+    <h2 class="text-center">
+        Pocet hlasov spolu: {electionsStatus.total_votes}
+    </h2>
+</div>
+
 <div class="container-fluid">
     <div class="row">
-        <div class="col-10 mx-auto" style="min-height: 300px;">
+        <div class="col-10 mx-auto my-5" style="min-height: 300px;">
             <div id="parliament-map" />
+            <div id="parliament-map-legend">
+                <div class="row d-flex justify-content-center gx-3">
+                    {#each partiesInParliament as party, i}
+                        <div class="col-auto">
+                            <div
+                                class="card border-0 px-3 py-2 d-flex flex-column text-white shadow"
+                                style="background-color: {party.color}"
+                            >
+                                <div class="text-center">{party.seats}</div>
+                                <div>{abbr(party.name, 6)}...</div>
+                            </div>
+                        </div>
+                    {/each}
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -259,7 +362,6 @@
 <canvas id="myChart1" />
 <canvas id="myChart2" />
 <canvas id="myChart3" />
-<div class="test">Ahoj</div>
 
 <table>
     <thead>
