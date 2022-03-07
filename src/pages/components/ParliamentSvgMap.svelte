@@ -167,26 +167,26 @@
         partiesInParliament.forEach((party) => {
             let number_of_seats = party.seats;
             let seated_candidates = party.candidates.slice(0, number_of_seats);
-            console.log("seated_candidates", seated_candidates)
+            console.log("seated_candidates", seated_candidates);
 
             // Get array of seat number for this party (sorted by lowest angle)
             let available_seats = poitsData
                 .slice(seat_index, seat_index + number_of_seats)
                 .map((i) => i.seat);
-            console.log("Slicujem:", seat_index, seat_index + number_of_seats);
-            console.log("available_seats", available_seats);
+            // console.log("Slicujem:", seat_index, seat_index + number_of_seats);
+            // console.log("available_seats", available_seats);
 
             // Order it by seat number and assign them to seated candiates in ascending order, so candidates with more votes are in the front
             let available_seats_in_order = available_seats.sort(
                 (a, b) => a - b
             );
             seated_candidates.forEach((candidate, i) => {
-                console.log(
-                    "Candidate",
-                    candidate.id,
-                    "seating to seat",
-                    available_seats_in_order[i]
-                );
+                // console.log(
+                //     "Candidate",
+                //     candidate.id,
+                //     "seating to seat",
+                //     available_seats_in_order[i]
+                // );
                 JQ(".seat-" + available_seats_in_order[i])
                     .attr("data-parliament-member", candidate.id)
                     .attr("fill", party.color);
@@ -200,6 +200,8 @@
             .select("#parliament-map-wrapper")
             .append("div")
             .attr("class", "parliament-tooltip");
+
+        var jq_tooltip = JQ(".parliament-tooltip");
         var tooltipLabel = tooltip.append("div").attr("class", "label");
         var tooltipCount = tooltip.append("div").attr("class", "count");
         var tooltipPercent = tooltip.append("div").attr("class", "percent");
@@ -207,7 +209,7 @@
         // console.log(JQ("#parliament-map-wrapper"));
 
         //
-        console.log(d3.select("#parliament-map circle"));
+        // console.log(d3.select("#parliament-map circle"));
         d3.selectAll("#parliament-map circle")
             .on("mouseover", function (e) {
                 // console.log(tooltip);
@@ -216,14 +218,17 @@
                 let memberId = elem.data("parliament-member");
                 if (memberId) {
                     let member = lookup.candidates[memberId];
-                    tooltip
-                        // .text(getCandidateFullName(member))
-                        .style("top", elem.offset().top - 120 + "px")
-                        .style("left", elem.offset().left - 12 + "px");
 
                     tooltipLabel.text(getCandidateFullName(member));
                     tooltipCount.text("Počet hlasov:" + member.doc_count);
                     tooltipPercent.text("Percent:" + member.percentage);
+
+                    console.log("tooltip offsets", jq_tooltip.height());
+
+                    tooltip
+                        // .text(getCandidateFullName(member))
+                        .style("top", elem.offset().top - (jq_tooltip.height() + 32 ) + "px")
+                        .style("left", elem.offset().left - 12 + "px");
 
                     return tooltip.style("visibility", "visible");
                 }
@@ -302,6 +307,7 @@
                 align-items: center;
                 text-align: center;
                 font-size: 0.8rem;
+                line-break: anywhere;
             }
         }
     }
