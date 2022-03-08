@@ -4,7 +4,7 @@
     import { onMount } from "svelte";
     import * as JQ from "jquery";
     import * as d3 from "d3";
-    import { abbr } from "../../lib/helpers/helpers.js";
+    import { abbr, getCandidateFullName } from "../../lib/helpers/helpers.js";
 
     onMount(async () => {
         console.log("Parliament map on mount");
@@ -120,11 +120,6 @@
         var BC = Math.sqrt(Math.pow(B[0] - C[0], 2) + Math.pow(B[1] - C[1], 2));
         var AC = Math.sqrt(Math.pow(C[0] - A[0], 2) + Math.pow(C[1] - A[1], 2));
         return Math.acos((BC * BC + AB * AB - AC * AC) / (2 * BC * AB));
-    }
-
-    function getCandidateFullName(c) {
-        let x = c.degrees_before ? c.degrees_before + " " : "";
-        return x + c.first_name + " " + c.last_name;
     }
 
     function calcCircleOrderAndLabels() {
