@@ -120,7 +120,7 @@
 
 <PartiesTable {partyResults} />
 
-<CandidatesInParliamentTable {partiesInParliament} />
+<CandidatesInParliamentTable {partiesInParliament} {lookup}/>
 
 <style>
 </style>

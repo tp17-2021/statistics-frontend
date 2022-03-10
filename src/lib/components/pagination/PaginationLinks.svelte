@@ -20,7 +20,8 @@
         console.log("paginationObject", paginationObject)
     }
 
-    paginationObjectChanged()  // update on load
+    // $: watchForPartiesData = (paginationObject) => { paginationObject = paginationObject};
+    paginationObjectChanged();  // update on load
 </script>
 
 <style lang="scss">
@@ -41,6 +42,11 @@
     }
   }
 </style>
+
+<!-- <h2>Paginations</h2>
+<p>PL paginationObject.items.length {paginationObject.items.length}</p>
+<p>PL paginationObject.countOfPages {paginationObject.countOfPages}</p> -->
+<!-- <p>{JSON.stringify(paginationObject)}</p> -->
 
 {#if paginationObject.countOfPages > 1}
     <div class="pagination">

@@ -7,12 +7,12 @@
     import { abbr, getCandidateFullName } from "../../lib/helpers/helpers.js";
 
     onMount(async () => {
-        console.log("Parliament map on mount");
-        console.log(partiesInParliament);
+        // console.log("Parliament map on mount");
+        // console.log(partiesInParliament);
         setUpParliamentDiagramResults(partiesInParliament);
     });
 
-    $: watchForPartiesData = setUpParliamentDiagramResults(partiesInParliament);
+    $: { setUpParliamentDiagramResults(partiesInParliament); }
 
     function setUpParliamentDiagramResults(partiesInParliament) {
         if (!partiesInParliament.length) {
@@ -20,7 +20,6 @@
         }
 
         var JQparliament_wrapper = JQ("#parliament-map");
-        console.log(JQparliament_wrapper);
 
         var w = JQparliament_wrapper.parent().width(),
             h = Math.floor(JQparliament_wrapper.parent().width() * 0.7),
@@ -42,8 +41,6 @@
         });
 
         var dot_l = total_l / dots;
-
-        console.log("Sizes:", h, w);
         var svg = d3
             .select("#parliament-map")
             .append("svg")
@@ -92,11 +89,6 @@
                 );
             dots_total += dot_cnt;
         });
-
-        console.log("pocet kruhov");
-        console.log(JQ("#parliament-map circle").length);
-        console.log(dots_total);
-
         calcCircleOrderAndLabels();
     }
 
@@ -131,7 +123,6 @@
             JQcanvas_offset.height,
         ];
 
-        console.log("points", JQcanvas_left_bottom, JQcanvas_bottom_middle);
         var poitsData = [];
         JQ("circle").each(function (i, elem) {
             let circleNumber = i + 1;
@@ -156,13 +147,11 @@
         });
 
         poitsData.sort((a, b) => a.angle - b.angle);
-        console.log("poitsData", poitsData); // Sorted
 
         let seat_index = 0;
         partiesInParliament.forEach((party) => {
             let number_of_seats = party.seats;
             let seated_candidates = party.candidates.slice(0, number_of_seats);
-            console.log("seated_candidates", seated_candidates);
 
             // Get array of seat number for this party (sorted by lowest angle)
             let available_seats = poitsData
@@ -215,8 +204,8 @@
                     let member = lookup.candidates[memberId];
 
                     tooltipLabel.text(getCandidateFullName(member));
-                    tooltipCount.text("Počet hlasov:" + member.doc_count);
-                    tooltipPercent.text("Percent:" + member.percentage);
+                    tooltipCount.text("Počet hlasov: " + member.doc_count);
+                    tooltipPercent.text("Percent: " + member.percentage);
 
                     console.log("tooltip offsets", jq_tooltip.height());
 

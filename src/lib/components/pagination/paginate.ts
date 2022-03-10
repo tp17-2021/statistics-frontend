@@ -19,6 +19,7 @@ export function getNumberOfPages(filtered, perPage) {
 }
 
 function search(objectsToFilter, searchTerm: string, searchBy: string[]) {
+    console.log("in search funkction");
     if (searchTerm === '') {
         return objectsToFilter;
     }
@@ -43,6 +44,7 @@ function removeAccents(str) {
 }
 
 export function searchAndPaginate(paginationObject: IpaginationObject): void {
+    console.log("search and paginate", paginationObject.items);
     const filtered = search(paginationObject.items, paginationObject.searchTerm, paginationObject.searchBy);
     paginationObject.countOfPages = getNumberOfPages(filtered, paginationObject.itemsPerPage);
     paginationObject.paginatedItems = paginate(filtered, paginationObject.currentPageNumber, paginationObject.itemsPerPage);
