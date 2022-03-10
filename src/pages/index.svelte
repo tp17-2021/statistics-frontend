@@ -15,11 +15,11 @@
 
     let referenceEle;
 
-    var partyResults = [];
-    var electionsStatus = [];
-    var partiesInParliament = [];
-    var config = null;
-    var lookup = {
+    let partyResults = [];
+    let electionsStatus = [];
+    let partiesInParliament = [];
+    let config = null;
+    let lookup = {
         parties: {},
         candidates: {},
     };

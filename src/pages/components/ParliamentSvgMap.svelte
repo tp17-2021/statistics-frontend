@@ -147,7 +147,7 @@
                     JQcanvas_bottom_middle,
                     coords
                 ) *
-                    180) /
+                    180)
                 Math.PI;
             poitsData.push({
                 angle: angle,
