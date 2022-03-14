@@ -10,8 +10,10 @@
     import Tooltip from "sv-bootstrap-tooltip";
 
     import PartiesTable from "../pages/components/PartiesTable.svelte";
+    import SlovakiaMap from "../pages/components/SlovakiaMap.svelte";
     import CandidatesInParliamentTable from "../pages/components/CandidatesInParliamentTable.svelte";
     import ParliamentSvgMap from "../pages/components/ParliamentSvgMap.svelte";
+    import StatisticsTable from "../pages/components/StatisticsTable.svelte";
 
     let referenceEle;
 
@@ -87,16 +89,9 @@
 
 </script>
 
-<!-- TODO nejdu mi css -->
+<!-- <SlovakiaMap {partiesInParliament}></SlovakiaMap> -->
 
-<div id="overview text-center my-5">
-    <h2 class="text-center">
-        Volebna ucast: {electionsStatus.participation} %
-    </h2>
-    <h2 class="text-center">
-        Pocet hlasov spolu: {electionsStatus.total_votes}
-    </h2>
-</div>
+<StatisticsTable {electionsStatus}></StatisticsTable>
 
 <div class="container-fluid">
     <div class="row">
@@ -105,6 +100,10 @@
         </div>
     </div>
 </div>
+
+<PartiesTable {partyResults} />
+
+<CandidatesInParliamentTable {partiesInParliament} {lookup}/>
 
 <div class="my-5">
     <button type="button" class="btn btn-secondary" bind:this={referenceEle}>
@@ -117,10 +116,6 @@
         <b>HTML</b>
     </Tooltip>
 </div>
-
-<PartiesTable {partyResults} />
-
-<CandidatesInParliamentTable {partiesInParliament} {lookup}/>
 
 <style>
 </style>

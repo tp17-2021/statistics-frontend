@@ -18,11 +18,8 @@
     };
 
     function paginateCandidates(partiesInParliament) {
-        console.log("paginateCandidates");
-        console.log("paginateCandidates"), partiesInParliament;
         searchAndPaginate(paginationObject); // paginationObject is updated inside this function
         paginatedCandiadtes = paginationObject.paginatedItems;
-        console.log("paginateCandidates", paginateCandidates);
     }
 
     let paginatedCandiadtes = [];
@@ -32,7 +29,6 @@
         partiesInParliament.forEach((p) => {
             p.candidates.forEach((c) => {
                 if (c.in_parliament) {
-                    console.log(p);
                     candidates.push(c);
                 }
             });
