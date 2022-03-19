@@ -1,7 +1,6 @@
 <script>
   import { Router } from "@roxi/routify";
   import { routes } from "../.routify/routes";
-  import "./api/websocket";
   import 'bootstrap';
 
   const config = {

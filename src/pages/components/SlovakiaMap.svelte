@@ -114,7 +114,7 @@
         //     });
 
         // d3.json("okresy_zaklad.topojson", function(error, geodata) {
-        d3.json("slovakia_topo.json", function(error, geodata) {
+        d3.json("api/slovakia.topojson", function(error, geodata) {
             if (error) return console.error(error);
 
             features.selectAll("path.okres")

@@ -10,6 +10,7 @@
     import Tooltip from "sv-bootstrap-tooltip";
 
     import PartiesTable from "../pages/components/PartiesTable.svelte";
+    import PartiesBarChart from "./components/PartiesBarChart.svelte";
     import SlovakiaMap from "../pages/components/SlovakiaMap.svelte";
     import CandidatesInParliamentTable from "../pages/components/CandidatesInParliamentTable.svelte";
     import ParliamentSvgMap from "../pages/components/ParliamentSvgMap.svelte";
@@ -100,6 +101,9 @@
         </div>
     </div>
 </div>
+
+
+<PartiesBarChart {partyResults}></PartiesBarChart>
 
 <PartiesTable {partyResults} />
 
