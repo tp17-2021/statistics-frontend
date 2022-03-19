@@ -91,10 +91,9 @@
                             >{getCandidateFullName(candidate)}</td
                         >
                         <td class="govuk-table__cell"
-                            >{abbr(
-                                lookup.parties[candidate.party_number - 1].name,
-                                30
-                            )}</td
+                            >{
+                                lookup.parties[candidate.party_number - 1].name
+                            }</td
                         >
                         <td class="govuk-table__cell govuk-table__cell--numeric"
                             >{candidate.doc_count}</td

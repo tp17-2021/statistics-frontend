@@ -210,7 +210,6 @@
                     console.log("tooltip offsets", jq_tooltip.height());
 
                     tooltip
-                        // .text(getCandidateFullName(member))
                         .style("top", elem.offset().top - (jq_tooltip.height() + 32 ) + "px")
                         .style("left", elem.offset().left - 12 + "px");
 

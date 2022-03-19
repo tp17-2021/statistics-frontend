@@ -89,7 +89,7 @@
 
 </script>
 
-<!-- <SlovakiaMap {partiesInParliament}></SlovakiaMap> -->
+<SlovakiaMap {partiesInParliament}></SlovakiaMap>
 
 <StatisticsTable {electionsStatus}></StatisticsTable>
 
