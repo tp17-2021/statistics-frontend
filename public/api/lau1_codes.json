@@ -1,0 +1,396 @@
+[{
+        "lau1": "Bratislava I",
+        "code": "SK0101",
+        "county_code": "101"
+    },
+    {
+        "lau1": "Bratislava II",
+        "code": "SK0102",
+        "county_code": "102"
+    },
+    {
+        "lau1": "Bratislava III",
+        "code": "SK0103",
+        "county_code": "103"
+    },
+    {
+        "lau1": "Bratislava IV",
+        "code": "SK0104",
+        "county_code": "104"
+    },
+    {
+        "lau1": "Bratislava V",
+        "code": "SK0105",
+        "county_code": "105"
+    },
+    {
+        "lau1": "Malacky",
+        "code": "SK0106",
+        "county_code": "106"
+    },
+    {
+        "lau1": "Pezinok",
+        "code": "SK0107",
+        "county_code": "107"
+    },
+    {
+        "lau1": "Senec",
+        "code": "SK0108",
+        "county_code": "108"
+    },
+    {
+        "lau1": "Dunajská Streda",
+        "code": "SK0211",
+        "county_code": "201"
+    },
+    {
+        "lau1": "Galanta",
+        "code": "SK0212",
+        "county_code": "202"
+    },
+    {
+        "lau1": "Hlohovec",
+        "code": "SK0213",
+        "county_code": "203"
+    },
+    {
+        "lau1": "Piešťany",
+        "code": "SK0214",
+        "county_code": "204"
+    },
+    {
+        "lau1": "Senica",
+        "code": "SK0215",
+        "county_code": "205"
+    },
+    {
+        "lau1": "Skalica",
+        "code": "SK0216",
+        "county_code": "206"
+    },
+    {
+        "lau1": "Trnava",
+        "code": "SK0217",
+        "county_code": "207"
+    },
+    {
+        "lau1": "Bánovce nad Bebravou",
+        "code": "SK0221",
+        "county_code": "301"
+    },
+    {
+        "lau1": "Ilava",
+        "code": "SK0222",
+        "county_code": "302"
+    },
+    {
+        "lau1": "Myjava",
+        "code": "SK0223",
+        "county_code": "303"
+    },
+    {
+        "lau1": "Nové Mesto nad Váhom",
+        "code": "SK0224",
+        "county_code": "304"
+    },
+    {
+        "lau1": "Partizánske",
+        "code": "SK0225",
+        "county_code": "305"
+    },
+    {
+        "lau1": "Považská Bystrica",
+        "code": "SK0226",
+        "county_code": "306"
+    },
+    {
+        "lau1": "Prievidza",
+        "code": "SK0227",
+        "county_code": "307"
+    },
+    {
+        "lau1": "Púchov",
+        "code": "SK0228",
+        "county_code": "308"
+    },
+    {
+        "lau1": "Trenčín",
+        "code": "SK0229",
+        "county_code": "309"
+    },
+    {
+        "lau1": "Komárno",
+        "code": "SK0231",
+        "county_code": "401"
+    },
+    {
+        "lau1": "Levice",
+        "code": "SK0232",
+        "county_code": "402"
+    },
+    {
+        "lau1": "Nitra",
+        "code": "SK0233",
+        "county_code": "403"
+    },
+    {
+        "lau1": "Nové Zámky",
+        "code": "SK0234",
+        "county_code": "404"
+    },
+    {
+        "lau1": "Šaľa",
+        "code": "SK0235",
+        "county_code": "405"
+    },
+    {
+        "lau1": "Topoľčany",
+        "code": "SK0236",
+        "county_code": "406"
+    },
+    {
+        "lau1": "Zlaté Moravce",
+        "code": "SK0237",
+        "county_code": "407"
+    },
+    {
+        "lau1": "Bytča",
+        "code": "SK0311",
+        "county_code": "501"
+    },
+    {
+        "lau1": "Čadca",
+        "code": "SK0312",
+        "county_code": "502"
+    },
+    {
+        "lau1": "Dolný Kubín",
+        "code": "SK0313",
+        "county_code": "503"
+    },
+    {
+        "lau1": "Kysucké Nové Mesto",
+        "code": "SK0314",
+        "county_code": "504"
+    },
+    {
+        "lau1": "Liptovský Mikuláš",
+        "code": "SK0315",
+        "county_code": "505"
+    },
+    {
+        "lau1": "Martin",
+        "code": "SK0316",
+        "county_code": "506"
+    },
+    {
+        "lau1": "Námestovo",
+        "code": "SK0317",
+        "county_code": "507"
+    },
+    {
+        "lau1": "Ružomberok",
+        "code": "SK0318",
+        "county_code": "508"
+    },
+    {
+        "lau1": "Turčianske Teplice",
+        "code": "SK0319",
+        "county_code": "509"
+    },
+    {
+        "lau1": "Tvrdošín",
+        "code": "SK031A",
+        "county_code": "510"
+    },
+    {
+        "lau1": "Žilina",
+        "code": "SK031B",
+        "county_code": "511"
+    },
+    {
+        "lau1": "Banská Bystrica",
+        "code": "SK0321",
+        "county_code": "601"
+    },
+    {
+        "lau1": "Banská Štiavnica",
+        "code": "SK0322",
+        "county_code": "602"
+    },
+    {
+        "lau1": "Brezno",
+        "code": "SK0323",
+        "county_code": "603"
+    },
+    {
+        "lau1": "Detva",
+        "code": "SK0324",
+        "county_code": "604"
+    },
+    {
+        "lau1": "Krupina",
+        "code": "SK0325",
+        "county_code": "605"
+    },
+    {
+        "lau1": "Lučenec",
+        "code": "SK0326",
+        "county_code": "606"
+    },
+    {
+        "lau1": "Poltár",
+        "code": "SK0327",
+        "county_code": "607"
+    },
+    {
+        "lau1": "Revúca",
+        "code": "SK0328",
+        "county_code": "608"
+    },
+    {
+        "lau1": "Rimavská Sobota",
+        "code": "SK0329",
+        "county_code": "609"
+    },
+    {
+        "lau1": "Veľký Krtíš",
+        "code": "SK032A",
+        "county_code": "610"
+    },
+    {
+        "lau1": "Zvolen",
+        "code": "SK032B",
+        "county_code": "611"
+    },
+    {
+        "lau1": "Žarnovica",
+        "code": "SK032C",
+        "county_code": "612"
+    },
+    {
+        "lau1": "Žiar nad Hronom",
+        "code": "SK032D",
+        "county_code": "613"
+    },
+    {
+        "lau1": "Bardejov",
+        "code": "SK0411",
+        "county_code": "701"
+    },
+    {
+        "lau1": "Humenné",
+        "code": "SK0412",
+        "county_code": "702"
+    },
+    {
+        "lau1": "Kežmarok",
+        "code": "SK0413",
+        "county_code": "703"
+    },
+    {
+        "lau1": "Levoča",
+        "code": "SK0414",
+        "county_code": "704"
+    },
+    {
+        "lau1": "Medzilaborce",
+        "code": "SK0415",
+        "county_code": "705"
+    },
+    {
+        "lau1": "Poprad",
+        "code": "SK0416",
+        "county_code": "706"
+    },
+    {
+        "lau1": "Prešov",
+        "code": "SK0417",
+        "county_code": "707"
+    },
+    {
+        "lau1": "Sabinov",
+        "code": "SK0418",
+        "county_code": "708"
+    },
+    {
+        "lau1": "Snina",
+        "code": "SK0419",
+        "county_code": "709"
+    },
+    {
+        "lau1": "Stará Ľubovňa",
+        "code": "SK041A",
+        "county_code": "710"
+    },
+    {
+        "lau1": "Stropkov",
+        "code": "SK041B",
+        "county_code": "711"
+    },
+    {
+        "lau1": "Svidník",
+        "code": "SK041C",
+        "county_code": "712"
+    },
+    {
+        "lau1": "Vranov nad Topľou",
+        "code": "SK041D",
+        "county_code": "713"
+    },
+    {
+        "lau1": "Gelnica",
+        "code": "SK0421",
+        "county_code": "801"
+    },
+    {
+        "lau1": "Košice I",
+        "code": "SK0422",
+        "county_code": "802"
+    },
+    {
+        "lau1": "Košice II",
+        "code": "SK0423",
+        "county_code": "803"
+    },
+    {
+        "lau1": "Košice III",
+        "code": "SK0424",
+        "county_code": "804"
+    },
+    {
+        "lau1": "Košice IV",
+        "code": "SK0425",
+        "county_code": "805"
+    },
+    {
+        "lau1": "Košice-okolie",
+        "code": "SK0426",
+        "county_code": "806"
+    },
+    {
+        "lau1": "Michalovce",
+        "code": "SK0427",
+        "county_code": "807"
+    },
+    {
+        "lau1": "Rožňava",
+        "code": "SK0428",
+        "county_code": "808"
+    },
+    {
+        "lau1": "Sobrance",
+        "code": "SK0429",
+        "county_code": "809"
+    },
+    {
+        "lau1": "Spišská Nová Ves",
+        "code": "SK042A",
+        "county_code": "810"
+    },
+    {
+        "lau1": "Trebišov",
+        "code": "SK042B",
+        "county_code": "811"
+    }
+]
