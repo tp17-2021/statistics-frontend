@@ -1,19 +1,26 @@
-### Want full control over everything in this template?
-We've created a new project called [**stackmix**](https://github.com/roxiness/stackmix). It's an experimental CLI that let's you pick and mix all features in a Routify template! Get started with `npx stackmix`
 
+### Statistics frontend
 
-# Routify Starter
-
-Starter template for [Routify](https://github.com/roxiness/routify).
+# Config import
+While having server running, you need to first download copy of config file with following command. 
+```sh
+curl http://localhost:8222/elections/voting-data > config.json
+```
 
 # Get started
 
-To get started run:
+Install libraries
 ```sh
-mkdir routify-app
-cd routify-app
-npx @roxi/routify init
+npm i
 ```
+
+Run application
+```sh
+npm run dev
+```
+
+# Problem localhost not working in some browsers
+Sometimes there are problems with chrome or safari. Try accessing the app in firefox on localhost or 127.0.0.1 (Try both!)
 
 
 # Scripts
@@ -26,8 +33,6 @@ Run with `npm run <command>`, for example `npm run dev`
 | `build`   | Build your app for production!                |
 | `preview` | Preview the built version of your app locally |
 
-# Want a service worker?
-Checkout [vite-plugin-pwa](http://npmjs.org/vite-plugin-pwa)
 
 # Extra Configs
 We include a few extra configs to help make it easy to ship a Routify project:
