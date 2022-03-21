@@ -25,10 +25,14 @@
     let lookup = {
         parties: {},
         candidates: {},
+        municipalities: {},
+        counties: {},
+        regions: {}
     };
 
     onMount(async () => {
         config = (await axios.get("api/config.json")).data;
+        console.log("config", config);
         config.parties.forEach((party) => {
             let partyWithoutCandidates = Object.assign({}, party);
             delete partyWithoutCandidates.candidates;
@@ -39,6 +43,20 @@
                 lookup.candidates[candidate["_id"]] = candidate;
             });
         });
+
+        config.regions.forEach(r => {
+            lookup.regions[r.code] = r;
+        })
+
+        config.municipalities.forEach(m => {
+            lookup.municipalities[m.code] = m;
+        })
+
+        config.counties.forEach(c => {
+            lookup.counties[c.code] = c;
+        })
+
+        console.log("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm", lookup.counties[217]);
 
         partyResults = await getPartyResults();
         partyResults.forEach((party, index) => {
@@ -71,28 +89,54 @@
 
         console.log(partyResults);
 
-        let totalSeats = partiesInParliament.reduce((partialSum, party) => partialSum + party.seats, 0);
-        console.log("totalSeats", totalSeats);
+        let localityResults = await getResultsByLocality();
+        console.log("localityResults", localityResults);
     });
 
     async function getElectionsStatus() {
-        const response = await axios.get(baseApiUrl("/elastic/elections-status"));
+        const response = await axios.get(
+            baseApiUrl("/elastic/elections-status")
+        );
         return response.data.data;
     }
 
     async function getPartyResults() {
+        const response = await axios
+            .post(baseApiUrl("/elastic/get-party-candidate-results"), {})
+            .catch(function (error) {
+                if (error.response) {
+                    // Request made and server responded
+                    console.log(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    console.log(error.request);
+                } else {
+                    // Something happened in setting up the request that triggered an Error
+                    console.log("Error", error.message);
+                }
+            });
+
+        if (response.data) {
+            return response.data;
+        } else {
+            return [];
+        }
+    }
+
+    async function getResultsByLocality(localityType = "region") {
         const response = await axios.post(
-            baseApiUrl("/elastic/get-party-candidate-results"),
-            {}
+            baseApiUrl("/elastic/get-results-by-locality"),
+            { filter_by: "county_code" }
         );
         return response.data;
     }
-
 </script>
 
-<SlovakiaMap {partiesInParliament}></SlovakiaMap>
+<SlovakiaMap {partiesInParliament} {lookup} />
 
-<StatisticsTable {electionsStatus}></StatisticsTable>
+<StatisticsTable {electionsStatus} />
 
 <div class="container-fluid">
     <div class="row">
@@ -102,12 +146,11 @@
     </div>
 </div>
 
-
-<PartiesBarChart {partyResults}></PartiesBarChart>
+<PartiesBarChart {partyResults} />
 
 <PartiesTable {partyResults} />
 
-<CandidatesInParliamentTable {partiesInParliament} {lookup}/>
+<CandidatesInParliamentTable {partiesInParliament} {lookup} />
 
 <div class="my-5">
     <button type="button" class="btn btn-secondary" bind:this={referenceEle}>
