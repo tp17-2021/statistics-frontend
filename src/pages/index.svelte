@@ -17,22 +17,28 @@
     import StatisticsTable from "../pages/components/StatisticsTable.svelte";
 
     let referenceEle;
-
+    let localityResultsCounties = null;
+    let localityResultsRegions = null;
     let partyResults = [];
     let electionsStatus = [];
     let partiesInParliament = [];
     let config = null;
+    let lau1_map = null;
     let lookup = {
         parties: {},
         candidates: {},
         municipalities: {},
         counties: {},
-        regions: {}
+        regions: {},
+        lau1_to_code: {},
+        code_to_lau1: {},
     };
 
     onMount(async () => {
         config = (await axios.get("api/config.json")).data;
+        lau1_map = (await axios.get("api/lau1_codes.json")).data;
         console.log("config", config);
+        console.log("lau1_map", lau1_map);
         config.parties.forEach((party) => {
             let partyWithoutCandidates = Object.assign({}, party);
             delete partyWithoutCandidates.candidates;
@@ -44,19 +50,22 @@
             });
         });
 
-        config.regions.forEach(r => {
+        config.regions.forEach((r) => {
             lookup.regions[r.code] = r;
-        })
+        });
 
-        config.municipalities.forEach(m => {
+        config.municipalities.forEach((m) => {
             lookup.municipalities[m.code] = m;
-        })
+        });
 
-        config.counties.forEach(c => {
+        config.counties.forEach((c) => {
             lookup.counties[c.code] = c;
-        })
+        });
 
-        console.log("mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm", lookup.counties[217]);
+        console.log(
+            "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
+            lookup.counties["217"]
+        );
 
         partyResults = await getPartyResults();
         partyResults.forEach((party, index) => {
@@ -76,6 +85,11 @@
             lookup.parties[partyResults[index].id] = partyResults[index];
         });
 
+        lau1_map.forEach((loc) => {
+            lookup.lau1_to_code[loc.lau1_code] = loc;
+            lookup.lau1_to_code[loc.code] = loc;
+        });
+
         console.log("lookup", lookup);
         console.log("partyResults", partyResults);
 
@@ -88,9 +102,20 @@
         // console.log("Loaded");
 
         console.log(partyResults);
+        let tmp = {};
+        (await getResultsByLocality("county")).forEach((countyRes) => {
+            tmp[countyRes.code] = countyRes;
+        });
+        localityResultsCounties = tmp;
 
-        let localityResults = await getResultsByLocality();
-        console.log("localityResults", localityResults);
+        tmp = {};
+        console.log("localityResultsCounties", localityResultsCounties);
+
+        (await getResultsByLocality("region")).forEach((regionRes) => {
+            tmp[regionRes.code] = regionRes;
+        });
+        localityResultsRegions = tmp;
+        console.log("localityResultsRegions", localityResultsRegions);
     });
 
     async function getElectionsStatus() {
@@ -128,13 +153,18 @@
     async function getResultsByLocality(localityType = "region") {
         const response = await axios.post(
             baseApiUrl("/elastic/get-results-by-locality"),
-            { filter_by: "county_code" }
+            { filter_by: `${localityType}_code` }
         );
         return response.data;
     }
 </script>
 
-<SlovakiaMap {partiesInParliament} {lookup} />
+<SlovakiaMap
+    {partiesInParliament}
+    {lookup}
+    {localityResultsRegions}
+    {localityResultsCounties}
+/>
 
 <StatisticsTable {electionsStatus} />
 

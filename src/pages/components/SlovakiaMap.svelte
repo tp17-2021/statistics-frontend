@@ -2,22 +2,39 @@
 
     // Source of codes and inspiration
     // https://cs.github.com/mikenikles/your-analytics/blob/842be6f217db254bc9e6996ce87266461c52e676/services/website/src/components/stats/world-map.svelte?q=chartjs-chart-geo
+    
     export let partiesInParliament;
     export let lookup;
+    export let localityResultsRegions;
+    export let localityResultsCounties;
+    
 
     import Chart from "chart.js/auto";
     import axios from "axios";
     import * as JQ from "jquery";
+
+    import { abbr, baseApiUrl } from "../../lib/helpers/helpers.js";
 
     // import * as d3 from "d3";
     // import {geoPath} from 'd3-geo';
 
     import { onMount } from "svelte";
 
+    let isLoadedD3 = false;
+
+    $: { plotSlovakiaMap(isLoadedD3, localityResultsCounties, localityResultsRegions, lookup, partiesInParliament); }
+
     onMount(async () => {
+        
     });
 
-    async function plotSlovakiaMap() {
+    async function plotSlovakiaMap(isLoadedD3, localityResultsCounties, localityResultsRegions, lookup, partiesInParliament) {
+        
+        if(!isLoadedD3 || !localityResultsCounties || !localityResultsRegions || !lookup || !partiesInParliament) {
+            return;
+        }
+
+        JQ("#map-container").html("");
 
         // Map dimensions
         let map_wrapper = JQ("#map-container");
@@ -94,8 +111,8 @@
                 .append("path")
                 .attr("class", "locality okres")
                 .attr("d", path)
-                .attr("code", function(path){
-                    return path.properties.code.replace("SK0", "");
+                .attr("lau1_code", function(path){
+                    return path.properties.code;
                 })
                 .style("fill", function() {
                     return range_colors[Math.floor(Math.random() * range_colors.length)];
@@ -110,28 +127,46 @@
                 console.log(d3.select(this));
                 let elem = JQ(d3.select(this)[0]);
                 console.log(elem);
-                let code = elem.attr("code");
-                console.log("code", code);
+                let lau1_code = elem.attr("lau1_code");
+                let locality_code = lookup.lau1_to_code[lau1_code].county_code
+                console.log("lau1_code", lau1_code);
+                console.log("locality_code", locality_code);
 
-                if (code) {
+                if (locality_code) {
                     // let member = lookup.candidates[memberId];
 
                     // tooltipLabel.text(getCandidateFullName(member));
                     // tooltipCount.text("Počet hlasov: " + member.doc_count);
                     // tooltipPercent.text("Percent: " + member.percentage);
 
-                    // let locationName = lookup.counties[code].name
-                    // console.log(lookup.counties[code]);
-                    // tooltipLabel.text(locationName);
+                    let locationName = lookup.lau1_to_code[lau1_code].lau1;
+                    console.log("locationName", locationName);
+                    tooltipLabel.text(locationName);
                     tooltipAttendance.text("Volebna ucast hlasov: " + "1");
                     let progressBarMarkup = `
                     <div class="progress">
                             <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                     `;
-                    tooltipResults.html(progressBarMarkup);
+                    
 
                     console.log("tooltip offsets", jq_tooltip.height());
+                    let text = '';
+                    let res = localityResultsCounties[locality_code];
+                    console.log("res", res);
+
+                    let first_party_percentage_coefficient = 100 / res.parties[0].percentage;
+                    res.parties.forEach((party, i) => {
+                        if(i < 6){
+                            text += `
+                            <div class="progress mb-1" style="height: 2rem;">
+                                    <div class="progress-bar" role="progressbar" style="width: ${party.percentage * first_party_percentage_coefficient}%; background-color: ${lookup.parties[party.id].color}" aria-valuenow="${party.percentage}" aria-valuemin="0" aria-valuemax="100">${abbr(lookup.parties[party.id].name, 32)}</div>
+                            </div>
+                        `;
+                        }
+                    });
+
+                    tooltipResults.html(text);
 
                     tooltip
                         .style("top", elem.offset().top - (jq_tooltip.height() + 16 ) + "px")
@@ -156,7 +191,10 @@
 </script>
 
 <svelte:head>
-    <script src="//d3js.org/d3.v3.min.js" on:load={() => plotSlovakiaMap() }></script>
+    <script src="//d3js.org/d3.v3.min.js" on:load={() => {
+        // plotSlovakiaMap(); 
+        isLoadedD3 = true; 
+        }}></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.3.0/d3.min.js" on:load={() => plotSlovakiaMap() }></script> -->
     <!-- <script src="https://d3js.org/d3.v7.min.js" on:load={() => plotSlovakiaMap() }></script> -->
     <script src="//d3js.org/topojson.v1.min.js"></script>
@@ -164,6 +202,7 @@
 
 <div class="parties-table">
     <button class="btn btn-primary" on:click={() => plotSlovakiaMap()}>plotSlovakiaMap</button>
+    <h4>{isLoadedD3}</h4>
     <h1 class="my-3">Mapa slovenska</h1>
     <div id="map-container" />
 </div>
