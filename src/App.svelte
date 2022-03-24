@@ -15,5 +15,6 @@
 <Router {routes} {config} />
 
 <style lang="scss" global>
+  $border-radius: 0;
   @import "bootstrap/scss/bootstrap";
 </style>

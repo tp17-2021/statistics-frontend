@@ -60,16 +60,10 @@
         let features = svg.append("g")
             .attr("class", "features");
 
-        let color_domain = [200, 300, 400, 500, 600, 700, 800]
-        let ext_color_domain = [0, 200, 300, 400, 500, 600, 700, 800]
-
-        let ext_color_domain2 = [0, 200, 300, 400, 500, 600, 700, 800]
-        ext_color_domain2.reverse();
-
         let range_colors = ["#CC0000", "#009933", "#0000CC", "#FFCC00", "#0066CC", "#CC6600", "#909090", "#FA8072", "#7f0000"]
 
         let color = d3.scale.threshold()
-            .domain(color_domain)
+            // .domain(color_domain)
             .range(range_colors);
 
 
@@ -94,7 +88,7 @@
             .attr("height", 145);
 
         //Create a tooltip, hidden at the start
-        let tooltip = d3.select("body #map-container").append("div").attr("id", "slovakia-map-tooltip");
+        let tooltip = d3.select("body #map-container").append("div").attr("id", "slovakia-map-tooltip").attr("class", "shadow");
         var jq_tooltip = JQ("#slovakia-map-tooltip");
         var tooltipLabel = tooltip.append("div").attr("class", "label");
         var tooltipAttendance = tooltip.append("div").attr("class", "attendance");
@@ -114,19 +108,21 @@
                 .attr("lau1_code", function(path){
                     return path.properties.code;
                 })
-                .style("fill", function() {
-                    return range_colors[Math.floor(Math.random() * range_colors.length)];
+                .style("fill", function(path) {
+                    let lau1_code = path.properties.code;
+                    let code = lookup.lau1_to_code[lau1_code].county_code;
+                    let resultsPerLocality = localityResultsCounties[code];
+                    let firstPartyId = resultsPerLocality.parties[0].id;
+                    let firstPartyColor = lookup.parties[firstPartyId].color;
+                    return firstPartyColor;
                 })
-                .style("fill-opacity", "60%")
+                .style("fill-opacity", "40%")
                 .style("stroke", "white")
-                .style("stroke-width", "2");
+                .style("stroke-width", "1");
 
             d3.selectAll("#map-container path").on("mouseover", function (e) {
-                console.log(e);
                 let d3object = e;
-                console.log(d3.select(this));
                 let elem = JQ(d3.select(this)[0]);
-                console.log(elem);
                 let lau1_code = elem.attr("lau1_code");
                 let locality_code = lookup.lau1_to_code[lau1_code].county_code
                 console.log("lau1_code", lau1_code);
@@ -142,25 +138,21 @@
                     let locationName = lookup.lau1_to_code[lau1_code].lau1;
                     console.log("locationName", locationName);
                     tooltipLabel.text(locationName);
-                    tooltipAttendance.text("Volebna ucast hlasov: " + "1");
-                    let progressBarMarkup = `
-                    <div class="progress">
-                            <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    `;
                     
-
                     console.log("tooltip offsets", jq_tooltip.height());
                     let text = '';
                     let res = localityResultsCounties[locality_code];
                     console.log("res", res);
-
+                    tooltipAttendance.text("Volebna ucast: " + res.participation + "%");
                     let first_party_percentage_coefficient = 100 / res.parties[0].percentage;
                     res.parties.forEach((party, i) => {
                         if(i < 6){
                             text += `
-                            <div class="progress mb-1" style="height: 2rem;">
-                                    <div class="progress-bar" role="progressbar" style="width: ${party.percentage * first_party_percentage_coefficient}%; background-color: ${lookup.parties[party.id].color}" aria-valuenow="${party.percentage}" aria-valuemin="0" aria-valuemax="100">${abbr(lookup.parties[party.id].name, 32)}</div>
+                            <div class="d-flex ">
+                            <div class="party-name">${lookup.parties[party.id].abbr}%</div>
+                            <div class="progress mb-1 w-100" style="height: 2rem;">
+                                    <div class="progress-bar" role="progressbar" style="width: ${party.percentage * first_party_percentage_coefficient}%; background-color: ${lookup.parties[party.id].color}" aria-valuenow="${party.percentage}" aria-valuemin="0" aria-valuemax="100">${lookup.parties[party.id].abbr}</div>
+                            </div>
                             </div>
                         `;
                         }
@@ -213,12 +205,20 @@
         color: #333;
         font-size: 14px;
         font-family: Helvetica;
-        border-radius: 4px;
         position: absolute;
         visibility: hidden;
         text-align: center;
         padding: 16px;
         z-index: 10;
+        width: 320px;
+
+        :global(.party-name){
+            width: 10rem;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            margin-right: 1rem;
+        }
 
         :global(.label) {
             font-size: 1.25rem;
@@ -230,5 +230,11 @@
         :global(.percent) {
             font-size: 1.125rem;
         }
+    }
+
+    :global(path){
+        &:hover {
+            fill-opacity: 1 !important;
+        } 
     }
 </style>

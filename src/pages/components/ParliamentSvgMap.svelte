@@ -12,7 +12,9 @@
         setUpParliamentDiagramResults(partiesInParliament);
     });
 
-    $: { setUpParliamentDiagramResults(partiesInParliament); }
+    $: {
+        setUpParliamentDiagramResults(partiesInParliament);
+    }
 
     function setUpParliamentDiagramResults(partiesInParliament) {
         if (!partiesInParliament.length) {
@@ -133,13 +135,12 @@
                 JQcanvas_offset
             );
             let angle =
-                (find_angle(
+                find_angle(
                     JQcanvas_left_bottom,
                     JQcanvas_bottom_middle,
                     coords
-                ) *
-                    180)
-                Math.PI;
+                ) * 180;
+            Math.PI;
             poitsData.push({
                 angle: angle,
                 seat: circleNumber,
@@ -183,7 +184,7 @@
         var tooltip = d3
             .select("#parliament-map-wrapper")
             .append("div")
-            .attr("class", "parliament-tooltip");
+            .attr("class", "parliament-tooltip shadow");
 
         var jq_tooltip = JQ(".parliament-tooltip");
         var tooltipLabel = tooltip.append("div").attr("class", "label");
@@ -210,7 +211,12 @@
                     console.log("tooltip offsets", jq_tooltip.height());
 
                     tooltip
-                        .style("top", elem.offset().top - (jq_tooltip.height() + 32 ) + "px")
+                        .style(
+                            "top",
+                            elem.offset().top -
+                                (jq_tooltip.height() + 32) +
+                                "px"
+                        )
                         .style("left", elem.offset().left - 12 + "px");
 
                     return tooltip.style("visibility", "visible");
@@ -228,7 +234,7 @@
 <h2 class="text-center display-5 fw-bold">Rozloženie parlamentu</h2>
 
 <div id="parliament-map-wrapper">
-    <div id="parliament-map" />
+    <div id="parliament-map"/>
 </div>
 
 <div id="parliament-map-legend">
@@ -240,10 +246,8 @@
                     style="background-color: {party.color}"
                 >
                     <div class="seat-count text-center">{party.seats}</div>
-
                     <div>
-                        <span class="party-name">{abbr(party.name, 20)}...</span
-                        >
+                        <span class="party-name text-center">{party.abbr}</span>
                     </div>
                 </div>
             </div>
@@ -256,8 +260,8 @@
         background: white;
         color: #333;
         font-size: 14px;
+        min-width: 300px;
         font-family: Helvetica;
-        border-radius: 4px;
         position: absolute;
         visibility: hidden;
         text-align: center;
@@ -279,7 +283,8 @@
     #parliament-map-legend {
         .card {
             width: 120px;
-            min-height: 100px;
+            padding: 1rem;
+            // min-height: 100px;
 
             .seat-count {
                 font-size: 1.5rem;
@@ -288,9 +293,11 @@
             .party-name {
                 display: flex;
                 align-items: center;
+                justify-content: center;
                 text-align: center;
-                font-size: 0.8rem;
+                font-size: 0.9rem;
                 line-break: anywhere;
+                margin-bottom: 0.5rem;
             }
         }
     }
