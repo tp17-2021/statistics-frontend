@@ -169,31 +169,31 @@
     <h1 class="mb-5">Výsledky volieb</h1>
 
     <div class="parties-graph mb-5">
-        <div class="tabs-wrapper">
-            <div class="govuk-tabs" data-module="govuk-tabs">
-                <h2 class="govuk-tabs__title">
-                    Contents
-                  </h2>
-                <ul class="govuk-tabs__list">
-                    <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
-                        <a class="govuk-tabs__tab" href="#top-parties">
-                        Strany nad 5%
-                        </a>
-                    </li>
-                    <li class="govuk-tabs__list-item">
-                        <a class="govuk-tabs__tab" href="#all-parties">
-                        Všetky strany
-                        </a>
-                    </li>
-                </ul>
-                <div class="govuk-tabs__panel" id="top-parties">
-                    top
-                </div>
-                <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="all-parties">
-                    all
-                </div>
-            </div>
-        </div>
+        <div class="govuk-tabs" data-module="govuk-tabs">
+            <h2 class="govuk-tabs__title">
+              Contents
+            </h2>
+            <ul class="govuk-tabs__list">
+                  <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+                    <a class="govuk-tabs__tab" href="#tab-1">
+                      Tab 1
+                    </a>
+                  </li>
+                  <li class="govuk-tabs__list-item">
+                    <a class="govuk-tabs__tab" href="#tab-2">
+                      Tab 2
+                    </a>
+                  </li>
+            </ul>
+                <section class="govuk-tabs__panel" id="tab-1">
+                  <h2 class="govuk-heading-l">Tab 1</h2>
+          
+                </section>
+                <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="tab-2">
+                  <h2 class="govuk-heading-l">Tab 2</h2>
+                </section>
+          </div>
+          
         <PartiesBarChart {partyResults} />
     </div>
 
