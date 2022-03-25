@@ -162,8 +162,8 @@
 </script>
 
 <style lang="scss">
+    @import 'node_modules/@id-sk/frontend/govuk/components/tabs/_tabs';
     .tabs-wrapper {
-        @import 'node_modules/@id-sk/frontend/govuk/components/tabs/_tabs';
     }
 </style>
 
@@ -173,6 +173,9 @@
     <div class="parties-graph mb-5">
         <div class="tabs-wrapper">
             <div class="govuk-tabs" data-module="govuk-tabs">
+                <h2 class="govuk-tabs__title">
+                    Contents
+                  </h2>
                 <ul class="govuk-tabs__list">
                     <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
                         <a class="govuk-tabs__tab" href="#top-parties">

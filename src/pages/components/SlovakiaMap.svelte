@@ -2,12 +2,10 @@
 
     // Source of codes and inspiration
     // https://cs.github.com/mikenikles/your-analytics/blob/842be6f217db254bc9e6996ce87266461c52e676/services/website/src/components/stats/world-map.svelte?q=chartjs-chart-geo
-    
     export let partiesInParliament;
     export let lookup;
     export let localityResultsRegions;
     export let localityResultsCounties;
-    
 
     import Chart from "chart.js/auto";
     import axios from "axios";
@@ -74,18 +72,6 @@
         //     .on("zoom", zoomed);
 
         // svg.call(zoom);
-
-        let rectangle = svg.append("rect")
-            .attr("x", 2)
-            .attr("y", 10)
-            .attr("rx", 10)
-            .attr("ry", 10)
-            .attr("opacity", 1.0)
-            .attr("fill", '#F7F7F7')
-            .attr("stroke", '#707070')
-            .attr("stroke-width", '0.2px')
-            .attr("width", 173)
-            .attr("height", 145);
 
         //Create a tooltip, hidden at the start
         let tooltip = d3.select("body #map-container").append("div").attr("id", "slovakia-map-tooltip").attr("class", "shadow");
@@ -169,7 +155,7 @@
             });
             console.log(d3.selectAll("#map-container path"))
             console.log("---------------------------");
-        });  
+        });
     }
 
     function zoomed() {
@@ -184,8 +170,8 @@
 
 <svelte:head>
     <script src="//d3js.org/d3.v3.min.js" on:load={() => {
-        // plotSlovakiaMap(); 
-        isLoadedD3 = true; 
+        // plotSlovakiaMap();
+        isLoadedD3 = true;
         }}></script>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.3.0/d3.min.js" on:load={() => plotSlovakiaMap() }></script> -->
     <!-- <script src="https://d3js.org/d3.v7.min.js" on:load={() => plotSlovakiaMap() }></script> -->
@@ -236,6 +222,6 @@
     :global(path){
         &:hover {
             fill-opacity: 1 !important;
-        } 
+        }
     }
 </style>
