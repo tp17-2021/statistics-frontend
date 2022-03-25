@@ -1,34 +1,36 @@
 <script>
 
+    import { abbr, baseApiUrl } from "../../lib/helpers/helpers.js";
+    import { onMount } from "svelte";
+
     // Source of codes and inspiration
     // https://cs.github.com/mikenikles/your-analytics/blob/842be6f217db254bc9e6996ce87266461c52e676/services/website/src/components/stats/world-map.svelte?q=chartjs-chart-geo
     export let partiesInParliament;
     export let lookup;
-    export let localityResultsRegions;
-    export let localityResultsCounties;
+    export let localityResults;
+    //export let localityResultsRegions;
+    //export let localityResultsCounties;
+    export let mapType = 'regions';
+
+    let isLoadedD3 = false;
+    let mapElement = null;
 
     import Chart from "chart.js/auto";
     import axios from "axios";
     import * as JQ from "jquery";
 
-    import { abbr, baseApiUrl } from "../../lib/helpers/helpers.js";
-
     // import * as d3 from "d3";
     // import {geoPath} from 'd3-geo';
 
-    import { onMount } from "svelte";
-
-    let isLoadedD3 = false;
-
-    $: { plotSlovakiaMap(isLoadedD3, localityResultsCounties, localityResultsRegions, lookup, partiesInParliament); }
+    $: { plotSlovakiaMap(isLoadedD3, localityResults, lookup, partiesInParliament); }
 
     onMount(async () => {
-        
+
     });
 
-    async function plotSlovakiaMap(isLoadedD3, localityResultsCounties, localityResultsRegions, lookup, partiesInParliament) {
-        
-        if(!isLoadedD3 || !localityResultsCounties || !localityResultsRegions || !lookup || !partiesInParliament) {
+    async function plotSlovakiaMap(isLoadedD3, localityResults, lookup, partiesInParliament) {
+
+        if(!isLoadedD3 || !localityResults || !lookup || !partiesInParliament) {
             return;
         }
 
@@ -64,14 +66,6 @@
             // .domain(color_domain)
             .range(range_colors);
 
-
-        //Create zoom/pan listener
-        //Change [1,Infinity] to adjust the min/max zoom scale
-        // let zoom = d3.behavior.zoom()
-        //     .scaleExtent([1, Infinity])
-        //     .on("zoom", zoomed);
-
-        // svg.call(zoom);
 
         //Create a tooltip, hidden at the start
         let tooltip = d3.select("body #map-container").append("div").attr("id", "slovakia-map-tooltip").attr("class", "shadow");
@@ -124,10 +118,10 @@
                     let locationName = lookup.lau1_to_code[lau1_code].lau1;
                     console.log("locationName", locationName);
                     tooltipLabel.text(locationName);
-                    
+
                     console.log("tooltip offsets", jq_tooltip.height());
                     let text = '';
-                    let res = localityResultsCounties[locality_code];
+                    let res = localityResults[locality_code];
                     console.log("res", res);
                     tooltipAttendance.text("Volebna ucast: " + res.participation + "%");
                     let first_party_percentage_coefficient = 100 / res.parties[0].percentage;
@@ -178,9 +172,9 @@
     <script src="//d3js.org/topojson.v1.min.js"></script>
 </svelte:head>
 
-<div class="parties-table">
+<div class="map-wrapper">
     {#if isLoadedD3}
-        <div id="map-container" />
+        <div id="map-container" class="map-div" this:bind={mapElement}/>
     {:else}
         <h2>Načítavam...</h2>
     {/if}

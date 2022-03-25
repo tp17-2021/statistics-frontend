@@ -7,8 +7,9 @@
 
     import { abbr, baseApiUrl } from "../lib/helpers/helpers.js";
 
-    import Tooltip from "sv-bootstrap-tooltip";
+    import {initAll} from '@id-sk/frontend/idsk/all.js';
 
+    import Tooltip from "sv-bootstrap-tooltip";
     import PartiesTable from "../pages/components/PartiesTable.svelte";
     import PartiesBarChart from "./components/PartiesBarChart.svelte";
     import SlovakiaMap from "../pages/components/SlovakiaMap.svelte";
@@ -35,6 +36,10 @@
     };
 
     onMount(async () => {
+
+        document.body.className = ((document.body.className) ? document.body.className + ' js-enabled' : 'js-enabled');
+        initAll();
+
         config = (await axios.get("api/config.json")).data;
         lau1_map = (await axios.get("api/lau1_codes.json")).data;
         console.log("config", config);
@@ -166,39 +171,35 @@
 
 <div class="pt-5">
 
-    <h1 class="mb-5">Výsledky volieb</h1>
+    <h1 class="govuk-heading-xl mb-5">Výsledky volieb</h1>
 
     <div class="parties-graph mb-5">
         <div class="govuk-tabs" data-module="govuk-tabs">
-            <h2 class="govuk-tabs__title">
-              Contents
-            </h2>
             <ul class="govuk-tabs__list">
                   <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
-                    <a class="govuk-tabs__tab" href="#tab-1">
-                      Tab 1
+                    <a class="govuk-tabs__tab" href="#parties-tab-1">
+                      Strany nad 5%
                     </a>
                   </li>
                   <li class="govuk-tabs__list-item">
-                    <a class="govuk-tabs__tab" href="#tab-2">
-                      Tab 2
+                    <a class="govuk-tabs__tab" href="#parties-tab-2">
+                      Všetky strany
                     </a>
                   </li>
             </ul>
-                <section class="govuk-tabs__panel" id="tab-1">
-                  <h2 class="govuk-heading-l">Tab 1</h2>
-          
+                <section class="govuk-tabs__panel" id="parties-tab-1">
+                  <h2 class="govuk-heading-m">Strany nad 5%</h2>
+                  <PartiesBarChart {partyResults} chartType={'elected'} />
                 </section>
-                <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="tab-2">
-                  <h2 class="govuk-heading-l">Tab 2</h2>
+                <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="parties-tab-2">
+                  <h2 class="govuk-heading-m">Všetky strany</h2>
+                  <PartiesBarChart {partyResults} chartType={'all'}/>
                 </section>
           </div>
-          
-        <PartiesBarChart {partyResults} />
     </div>
 
     <div class="partliament-graph mb-5">
-        <h2 class="text-center mb-3">Rozloženie parlamentu</h2>
+        <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
         <div class="row">
             <div class="col-10 mx-auto" style="min-height: 300px;">
                 <ParliamentSvgMap {partiesInParliament} {lookup} />
@@ -206,28 +207,35 @@
         </div>
     </div>
 
-    <div class="counrty-map mb-5">
-        <h2 class="text-center mb-3">Volebná mapa</h2>
+    <div class="country-map mb-5">
+        <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
         <SlovakiaMap
+            mapType={'regions'}
             {partiesInParliament}
             {lookup}
-            {localityResultsRegions}
-            {localityResultsCounties}
+            localityResults={localityResultsCounties}
+        />
+
+        <SlovakiaMap
+            mapType={'counties'}
+            {partiesInParliament}
+            {lookup}
+            localityResults={localityResultsRegions}
         />
     </div>
 
     <div class="elections-statistics mb-5">
-        <h2 class="text-center mb-3">Všeobecné štatistiky</h2>
+        <h2 class="govuk-heading-l text-center mb-3">Všeobecné štatistiky</h2>
         <StatisticsTable {electionsStatus} />
     </div>
 
     <div class="parties-table mb-5">
-        <h2 class="text-center mb-3">Výsledky strán</h2>
+        <h2 class="govuk-heading-l text-center mb-3">Výsledky strán</h2>
         <PartiesTable {partyResults} />
     </div>
 
     <div class="candidates-table mb-5">
-        <h2 class="text-center mb-3">Výsledky kandidátov</h2>
+        <h2 class="govuk-heading-l text-center mb-3">Výsledky kandidátov</h2>
         <CandidatesInParliamentTable {partiesInParliament} {lookup} />
     </div>
 

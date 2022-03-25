@@ -2,7 +2,6 @@
   import { Router } from "@roxi/routify";
   import { routes } from "../.routify/routes";
   import 'bootstrap';
-  import {initAll} from '@id-sk/frontend/idsk/all.js';
   import { onMount } from "svelte";
 
   const config = {
@@ -14,9 +13,7 @@
   };
 
   onMount(() => {
-    document.body.className = ((document.body.className) ? document.body.className + ' js-enabled' : 'js-enabled');
-    initAll();
-    console.log("App no mount");
+
   });
 </script>
 
