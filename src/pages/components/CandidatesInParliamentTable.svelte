@@ -51,17 +51,17 @@
 <div class="candidates-table-wrapper">
     <div class="row">
         <div class="col-12 col-md-8 mx-auto">
-            <input
-                type="text"
-                class="search-filter w-100 my-3 p-3 rounded"
-                placeholder="Hľadať podľa mena"
-                on:input={(e) => {
-                    console.log("hladam:", e.target.value);
-                    paginationObject.currentPageNumber = 1;
-                    paginationObject.searchTerm = e.target.value;
-                    paginateCandidates(paginationObject);
-                }}
-            />
+            <div class="govuk-form-group">
+                <input class="govuk-input" type="text"
+                    placeholder="Hľadať podľa mena"
+                    on:input={(e) => {
+                        console.log("hladam:", e.target.value);
+                        paginationObject.currentPageNumber = 1;
+                        paginationObject.searchTerm = e.target.value;
+                        paginateCandidates(paginationObject);
+                    }}
+                >
+            </div>
         </div>
     </div>
 

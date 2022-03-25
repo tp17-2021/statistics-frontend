@@ -158,16 +158,14 @@
         return response.data;
     }
 
-    //import './node_modules/@id-sk/frontend/govuk/components/tabs/tabs.js'
 </script>
 
 <style lang="scss">
-    @import 'node_modules/@id-sk/frontend/govuk/components/tabs/_tabs';
-    .tabs-wrapper {
-    }
+
 </style>
 
 <div class="pt-5">
+
     <h1 class="mb-5">Výsledky volieb</h1>
 
     <div class="parties-graph mb-5">

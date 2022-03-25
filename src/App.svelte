@@ -2,6 +2,7 @@
   import { Router } from "@roxi/routify";
   import { routes } from "../.routify/routes";
   import 'bootstrap';
+  import '@id-sk/frontend/idsk/all.js';
 
   const config = {
     urlTransform: {
@@ -17,4 +18,5 @@
 <style lang="scss" global>
   $border-radius: 0;
   @import "bootstrap/scss/bootstrap";
+  @import '@id-sk/frontend/idsk/all';
 </style>
