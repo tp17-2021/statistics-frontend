@@ -193,10 +193,11 @@
 </svelte:head>
 
 <div class="parties-table">
-    <button class="btn btn-primary" on:click={() => plotSlovakiaMap()}>plotSlovakiaMap</button>
-    <h4>{isLoadedD3}</h4>
-    <h1 class="my-3">Mapa slovenska</h1>
-    <div id="map-container" />
+    {#if isLoadedD3}
+        <div id="map-container" />
+    {:else}
+        <h2>Načítavam...</h2>
+    {/if}
 </div>
 
 <style type="text/scss">

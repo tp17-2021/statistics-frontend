@@ -231,8 +231,6 @@
     }
 </script>
 
-<h2 class="text-center display-5 fw-bold">Rozloženie parlamentu</h2>
-
 <div id="parliament-map-wrapper">
     <div id="parliament-map"/>
 </div>

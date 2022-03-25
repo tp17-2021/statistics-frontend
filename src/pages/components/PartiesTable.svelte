@@ -3,15 +3,14 @@
 </script>
 
 <div class="parties-table">
-    <h1 class="my-3">Tabulka stran</h1>
-    <table class="govuk-table mb-5">
+    <table class="govuk-table">
         <thead class="govuk-table__head">
             <tr class="govuk-table__row">
-                <th class="govuk-table__header">Poradie</th>
-                <th class="govuk-table__header">Nazov</th>
-                <th class="govuk-table__header">Hlasov</th>
-                <th class="govuk-table__header">Percent</th>
-                <th class="govuk-table__header">Sedadiel</th>
+                <th scope="col" class="govuk-table__header">Poradie</th>
+                <th scope="col" class="govuk-table__header">Názov</th>
+                <th scope="col" class="govuk-table__header govuk-table__header--numeric">Hlasov</th>
+                <th scope="col" class="govuk-table__header govuk-table__header--numeric">Percent</th>
+                <th scope="col" class="govuk-table__header govuk-table__header--numeric">Sedadiel</th>
             </tr>
         </thead>
         <tbody class="govuk-table__body">

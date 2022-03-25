@@ -157,42 +157,77 @@
         );
         return response.data;
     }
+
+    //import './node_modules/@id-sk/frontend/govuk/components/tabs/tabs.js'
 </script>
 
-<SlovakiaMap
-    {partiesInParliament}
-    {lookup}
-    {localityResultsRegions}
-    {localityResultsCounties}
-/>
+<style lang="scss">
+    .tabs-wrapper {
+        @import 'node_modules/@id-sk/frontend/govuk/components/tabs/_tabs';
+    }
+</style>
 
-<StatisticsTable {electionsStatus} />
+<div class="pt-5">
+    <h1 class="mb-5">Výsledky volieb</h1>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-10 mx-auto my-5" style="min-height: 300px;">
-            <ParliamentSvgMap {partiesInParliament} {lookup} />
+    <div class="parties-graph mb-5">
+        <div class="tabs-wrapper">
+            <div class="govuk-tabs" data-module="govuk-tabs">
+                <ul class="govuk-tabs__list">
+                    <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+                        <a class="govuk-tabs__tab" href="#top-parties">
+                        Strany nad 5%
+                        </a>
+                    </li>
+                    <li class="govuk-tabs__list-item">
+                        <a class="govuk-tabs__tab" href="#all-parties">
+                        Všetky strany
+                        </a>
+                    </li>
+                </ul>
+                <div class="govuk-tabs__panel" id="top-parties">
+                    top
+                </div>
+                <div class="govuk-tabs__panel govuk-tabs__panel--hidden" id="all-parties">
+                    all
+                </div>
+            </div>
+        </div>
+        <PartiesBarChart {partyResults} />
+    </div>
+
+    <div class="partliament-graph mb-5">
+        <h2 class="text-center mb-3">Rozloženie parlamentu</h2>
+        <div class="row">
+            <div class="col-10 mx-auto" style="min-height: 300px;">
+                <ParliamentSvgMap {partiesInParliament} {lookup} />
+            </div>
         </div>
     </div>
+
+    <div class="counrty-map mb-5">
+        <h2 class="text-center mb-3">Volebná mapa</h2>
+        <SlovakiaMap
+            {partiesInParliament}
+            {lookup}
+            {localityResultsRegions}
+            {localityResultsCounties}
+        />
+    </div>
+
+    <div class="elections-statistics mb-5">
+        <h2 class="text-center mb-3">Všeobecné štatistiky</h2>
+        <StatisticsTable {electionsStatus} />
+    </div>
+
+    <div class="parties-table mb-5">
+        <h2 class="text-center mb-3">Výsledky strán</h2>
+        <PartiesTable {partyResults} />
+    </div>
+
+    <div class="candidates-table mb-5">
+        <h2 class="text-center mb-3">Výsledky kandidátov</h2>
+        <CandidatesInParliamentTable {partiesInParliament} {lookup} />
+    </div>
+
 </div>
-
-<PartiesBarChart {partyResults} />
-
-<PartiesTable {partyResults} />
-
-<CandidatesInParliamentTable {partiesInParliament} {lookup} />
-
-<div class="my-5">
-    <button type="button" class="btn btn-secondary" bind:this={referenceEle}>
-        Tooltip test on top
-    </button>
-
-    <Tooltip triggerElement={referenceEle}>
-        <em>Tooltip</em>
-        <u>with</u>
-        <b>HTML</b>
-    </Tooltip>
-</div>
-
-<style>
-</style>

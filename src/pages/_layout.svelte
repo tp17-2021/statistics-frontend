@@ -4,22 +4,13 @@
 </script>
 
 <Header />
-<main class="container-fluid">
+<main class="container">
     <Spinner />
-    <div class="container">
-        <slot />
-    </div>
+    <slot />
 </main>
 
-<style>
-    .full-modal {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        padding: 1rem;
-        width: 100%;
-        max-width: 768px;
-        margin: 0 auto;
-        box-sizing: border-box;
-    }
-</style>
+<div class="footer bg-secondary text-white py-5">
+    <div class="container">
+        &copy;
+    </div>
+</div>

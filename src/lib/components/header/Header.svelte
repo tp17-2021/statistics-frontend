@@ -1,5 +1,4 @@
 <script>
-	// import {config} from "../stores";
 import {url} from "@roxi/routify";
 </script>
 
@@ -10,28 +9,26 @@ import {url} from "@roxi/routify";
 	}
 	.header-content {
 		color: white;
-		padding: 1rem;
+		padding: 1rem 0;
 		font-size: 24px;
-
 		display: flex;
 		place-items: center;
 		width: 100%;
-		max-width: 768px;
-
 		margin: 0 auto;
 	}
 
 
 	img {
 		margin-right: 1rem;
-		margin-left: 1rem;
 	}
 </style>
 
 <header>
-	<div class="header-content">
-		<img src="{$url('/img/sk.png')}" alt="" height="50px">
-		<div>Voľby</div>
+	<div class="container">
+		<div class="header-content">
+			<img src="{$url('/img/sk.png')}" alt="" height="50px">
+			<div>Voľby</div>
+		</div>
 	</div>
 </header>
 

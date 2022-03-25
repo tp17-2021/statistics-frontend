@@ -52,9 +52,9 @@
                         },
                         tooltip: {
                             // Disable the on-canvas tooltip
-                            enabled: false,
+                            enabled: true,
 
-                            external: function (context) {
+                            /*external: function (context) {
                                 // Tooltip Element
                                 let tooltipEl =
                                     document.getElementById("chartjs-tooltip");
@@ -159,7 +159,7 @@
                                     tooltipModel.padding +
                                     "px";
                                 tooltipEl.style.pointerEvents = "none";
-                            },
+                            },*/
                         },
                     },
                 },
@@ -170,6 +170,3 @@
 
 <canvas id="parties-bar-chart-1" />
 <canvas id="parties-bar-chart-2" />
-
-<style>
-</style>
