@@ -7,7 +7,7 @@
 
     import { abbr, baseApiUrl } from "../lib/helpers/helpers.js";
 
-    import {initAll} from '@id-sk/frontend/idsk/all.js';
+    import { initAll } from "@id-sk/frontend/idsk/all.js";
 
     import Tooltip from "sv-bootstrap-tooltip";
     import PartiesTable from "../pages/components/PartiesTable.svelte";
@@ -33,11 +33,13 @@
         regions: {},
         lau1_to_code: {},
         code_to_lau1: {},
+        nuts3_to_region_code: {},
     };
 
     onMount(async () => {
-
-        document.body.className = ((document.body.className) ? document.body.className + ' js-enabled' : 'js-enabled');
+        document.body.className = document.body.className
+            ? document.body.className + " js-enabled"
+            : "js-enabled";
         initAll();
 
         config = (await axios.get("api/config.json")).data;
@@ -66,6 +68,17 @@
         config.counties.forEach((c) => {
             lookup.counties[c.code] = c;
         });
+
+        lookup.nuts3_to_region_code = {
+            SK010: 1,
+            SK021: 2,
+            SK022: 3,
+            SK023: 4,
+            SK031: 5,
+            SK032: 6,
+            SK041: 7,
+            SK042: 8,
+        };
 
         console.log(
             "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
@@ -162,40 +175,39 @@
         );
         return response.data;
     }
-
 </script>
 
-<style lang="scss">
-
-</style>
-
 <div class="pt-5">
-
     <h1 class="govuk-heading-xl mb-5">Výsledky volieb</h1>
 
     <div class="parties-graph mb-5">
         <div class="govuk-tabs" data-module="govuk-tabs">
             <ul class="govuk-tabs__list">
-                  <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+                <li
+                    class="govuk-tabs__list-item govuk-tabs__list-item--selected"
+                >
                     <a class="govuk-tabs__tab" href="#parties-tab-1">
-                      Strany nad 5%
+                        Strany nad 5%
                     </a>
-                  </li>
-                  <li class="govuk-tabs__list-item">
+                </li>
+                <li class="govuk-tabs__list-item">
                     <a class="govuk-tabs__tab" href="#parties-tab-2">
-                      Všetky strany
+                        Všetky strany
                     </a>
-                  </li>
+                </li>
             </ul>
-                <section class="govuk-tabs__panel" id="parties-tab-1">
-                  <h2 class="govuk-heading-m">Strany nad 5%</h2>
-                  <PartiesBarChart {partyResults} chartType={'elected'} />
-                </section>
-                <section class="govuk-tabs__panel govuk-tabs__panel--hidden" id="parties-tab-2">
-                  <h2 class="govuk-heading-m">Všetky strany</h2>
-                  <PartiesBarChart {partyResults} chartType={'all'}/>
-                </section>
-          </div>
+            <section class="govuk-tabs__panel" id="parties-tab-1">
+                <h2 class="govuk-heading-m">Strany nad 5%</h2>
+                <PartiesBarChart {partyResults} chartType={"elected"} />
+            </section>
+            <section
+                class="govuk-tabs__panel govuk-tabs__panel--hidden"
+                id="parties-tab-2"
+            >
+                <h2 class="govuk-heading-m">Všetky strany</h2>
+                <PartiesBarChart {partyResults} chartType={"all"} />
+            </section>
+        </div>
     </div>
 
     <div class="partliament-graph mb-5">
@@ -209,19 +221,50 @@
 
     <div class="country-map mb-5">
         <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
-        <SlovakiaMap
-            mapType={'regions'}
-            {partiesInParliament}
-            {lookup}
-            localityResults={localityResultsCounties}
-        />
+
+        <div class="govuk-tabs" data-module="govuk-tabs">
+            <ul class="govuk-tabs__list">
+                <li
+                    class="govuk-tabs__list-item govuk-tabs__list-item--selected"
+                >
+                    <a class="govuk-tabs__tab" href="#map-tab-1"> Tab 1 </a>
+                </li>
+                <li class="govuk-tabs__list-item">
+                    <a class="govuk-tabs__tab" href="#map-tab-2"> tab 2 </a>
+                </li>
+            </ul>
+            <section class="govuk-tabs__panel" id="map-tab-1">
+                <h2 class="govuk-heading-m">Strany nad 5%</h2>
+                <SlovakiaMap
+                    mapType={"regions"}
+                    {partiesInParliament}
+                    {lookup}
+                    localityResults={localityResultsRegions}
+                    uniqueID={"1"}
+                />
+            </section>
+            <section
+                class="govuk-tabs__panel govuk-tabs__panel--hidden"
+                id="map-tab-2"
+            >
+                <h2 class="govuk-heading-m">Všetky strany</h2>
+                <SlovakiaMap
+                    mapType={"counties"}
+                    {partiesInParliament}
+                    {lookup}
+                    localityResults={localityResultsCounties}
+                    uniqueID={"2"}
+                />
+            </section>
+        </div>
 
         <SlovakiaMap
-            mapType={'counties'}
-            {partiesInParliament}
-            {lookup}
-            localityResults={localityResultsRegions}
-        />
+                    mapType={"counties"}
+                    {partiesInParliament}
+                    {lookup}
+                    localityResults={localityResultsCounties}
+                    uniqueID={"3"}
+                />
     </div>
 
     <div class="elections-statistics mb-5">
@@ -238,5 +281,7 @@
         <h2 class="govuk-heading-l text-center mb-3">Výsledky kandidátov</h2>
         <CandidatesInParliamentTable {partiesInParliament} {lookup} />
     </div>
-
 </div>
+
+<style lang="scss">
+</style>
