@@ -37,9 +37,7 @@
         if(!isLoadedD3 || !localityResults || !lookup || !partiesInParliament) {
             return;
         }
-        
-        console.log("localityResults", localityResults);
-        
+            
         JQ("#map-container-"+uniqueID).html("");
         
         // Map dimensions
@@ -100,17 +98,17 @@
                 })
                 .style("fill", function(path) {
                     let locality_code = null;
-                    console.log("path", path);
+                    // console.log("path", path);
                     if(mapType == "regions"){
                         let nuts3 = path.properties.code;
-                        console.log("nuts3", nuts3);
-                        console.log("lookup.nuts3_to_region_code", lookup.nuts3_to_region_code);
+                        // console.log("nuts3", nuts3);
+                        // console.log("lookup.nuts3_to_region_code", lookup.nuts3_to_region_code);
                         locality_code = lookup.nuts3_to_region_code[nuts3]
-                        console.log("locality_code", locality_code);
+                        // console.log("locality_code", locality_code);
                     } else {
                         let lau1_code = path.properties.code;
                         locality_code = lookup.lau1_to_code[lau1_code].county_code;
-                        console.log("lau1_code", lau1_code);
+                        // console.log("lau1_code", lau1_code);
                     }               
                     
                     let resultsInLocality = localityResults[locality_code];

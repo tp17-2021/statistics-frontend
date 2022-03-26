@@ -16,6 +16,7 @@
     import CandidatesInParliamentTable from "../pages/components/CandidatesInParliamentTable.svelte";
     import ParliamentSvgMap from "../pages/components/ParliamentSvgMap.svelte";
     import StatisticsTable from "../pages/components/StatisticsTable.svelte";
+    import RegionalWinnersCards from "../pages/components/RegionalWinnersCards.svelte";
 
     let referenceEle;
     let localityResultsCounties = null;
@@ -178,6 +179,9 @@
 </script>
 
 <div class="pt-5">
+
+    <RegionalWinnersCards {lookup} localityResultsRegions={localityResultsRegions}></RegionalWinnersCards>
+
     <h1 class="govuk-heading-xl mb-5">Výsledky volieb</h1>
 
     <div class="parties-graph mb-5">
