@@ -67,8 +67,8 @@
 
     <table class="govuk-table mb-3">
         <colgroup>
-            <col style="width:30%" />
-            <col style="width:30%" />
+            <col style="width:35%" />
+            <col style="width:25%" />
             <col style="width:20%" />
             <col style="width:20%" />
         </colgroup>
@@ -89,7 +89,7 @@
                     >
                     <td class="govuk-table__cell"
                         >{
-                            lookup.parties[candidate.party_number - 1].name
+                            lookup.parties[candidate.party_number - 1].abbr
                         }</td
                     >
                     <td class="govuk-table__cell govuk-table__cell--numeric"

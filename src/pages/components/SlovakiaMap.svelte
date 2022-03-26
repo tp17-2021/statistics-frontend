@@ -42,7 +42,9 @@
         
         // Map dimensions
         let map_wrapper = JQ("#map-container-"+uniqueID);
-        let width = map_wrapper.parent().width();
+        console.log("map_wrapper", map_wrapper);
+        let width = map_wrapper.parent().parent().width();
+        console.log("map_wrapper.parent()", map_wrapper.parent());
         let height = Math.floor(width * 0.7);
         
         // let formatNumber = d3.format("..0f");
@@ -188,9 +190,9 @@
     <script src="//d3js.org/topojson.v1.min.js"></script>
 </svelte:head>
 
-<div class="map-wrapper">
-    <div id="map-container-{uniqueID}" class="map-div"/>
-</div>
+
+<div id="map-container-{uniqueID}" class="map-div"/>
+
 
 <style type="text/scss">
     :global(.slovakia-map-tooltip) {

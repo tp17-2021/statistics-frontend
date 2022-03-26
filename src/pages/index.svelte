@@ -179,8 +179,7 @@
 </script>
 
 <div class="pt-5">
-
-    <RegionalWinnersCards {lookup} localityResultsRegions={localityResultsRegions}></RegionalWinnersCards>
+    <RegionalWinnersCards {lookup} {localityResultsRegions} />
 
     <h1 class="govuk-heading-xl mb-5">Výsledky volieb</h1>
 
@@ -231,27 +230,14 @@
                 <li
                     class="govuk-tabs__list-item govuk-tabs__list-item--selected"
                 >
-                    <a class="govuk-tabs__tab" href="#map-tab-1"> Tab 1 </a>
+                    <a class="govuk-tabs__tab" href="#map-tab-1"> Okresy </a>
                 </li>
                 <li class="govuk-tabs__list-item">
-                    <a class="govuk-tabs__tab" href="#map-tab-2"> tab 2 </a>
+                    <a class="govuk-tabs__tab" href="#map-tab-2"> Kraje </a>
                 </li>
             </ul>
             <section class="govuk-tabs__panel" id="map-tab-1">
-                <h2 class="govuk-heading-m">Strany nad 5%</h2>
-                <SlovakiaMap
-                    mapType={"regions"}
-                    {partiesInParliament}
-                    {lookup}
-                    localityResults={localityResultsRegions}
-                    uniqueID={"1"}
-                />
-            </section>
-            <section
-                class="govuk-tabs__panel govuk-tabs__panel--hidden"
-                id="map-tab-2"
-            >
-                <h2 class="govuk-heading-m">Všetky strany</h2>
+                <h2 class="govuk-heading-m">Výsledky podľa okresov</h2>
                 <SlovakiaMap
                     mapType={"counties"}
                     {partiesInParliament}
@@ -260,15 +246,20 @@
                     uniqueID={"2"}
                 />
             </section>
-        </div>
-
-        <SlovakiaMap
-                    mapType={"counties"}
+            <section
+                class="govuk-tabs__panel govuk-tabs__panel--hidden"
+                id="map-tab-2"
+            >
+                <h2 class="govuk-heading-m">Výsledky podľa krajov</h2>
+                <SlovakiaMap
+                    mapType={"regions"}
                     {partiesInParliament}
                     {lookup}
-                    localityResults={localityResultsCounties}
-                    uniqueID={"3"}
+                    localityResults={localityResultsRegions}
+                    uniqueID={"1"}
                 />
+            </section>
+        </div>
     </div>
 
     <div class="elections-statistics mb-5">
