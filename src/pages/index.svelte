@@ -13,7 +13,7 @@
     import PartiesTable from "../pages/components/PartiesTable.svelte";
     import PartiesBarChart from "./components/PartiesBarChart.svelte";
     import SlovakiaMap from "../pages/components/SlovakiaMap.svelte";
-    import CandidatesInParliamentTable from "../pages/components/CandidatesInParliamentTable.svelte";
+    import CandidatesTable from "./components/CandidatesTable.svelte";
     import ParliamentSvgMap from "../pages/components/ParliamentSvgMap.svelte";
     import StatisticsTable from "../pages/components/StatisticsTable.svelte";
     import RegionalWinnersCards from "../pages/components/RegionalWinnersCards.svelte";
@@ -24,6 +24,8 @@
     let partyResults = [];
     let electionsStatus = [];
     let partiesInParliament = [];
+    let candidates = [];
+    let candidatesInParliament = [];
     let config = null;
     let lau1_map = null;
     let lookup = {
@@ -113,7 +115,23 @@
         console.log("partyResults", partyResults);
 
         partiesInParliament = partyResults.filter((i) => i.in_parliament);
+
+        let ttt = []
+        partyResults.forEach((party, index) => {
+            party.candidates.forEach((c) => {
+                if (c.in_parliament) {
+                    ttt.push(c);
+                }
+                candidates.push(c);
+            });
+        });
+        candidates = [...candidates]
+        candidatesInParliament = [...ttt]
+
         console.log("partiesInParliament", partiesInParliament);
+        console.log("candidates", candidates);
+        console.log("candidatesInParliament", candidatesInParliament);
+
         electionsStatus = await getElectionsStatus();
 
         // console.log("electionsStatus", electionsStatus);
@@ -273,8 +291,8 @@
     </div>
 
     <div class="candidates-table mb-5">
-        <h2 class="govuk-heading-l text-center mb-3">Výsledky kandidátov</h2>
-        <CandidatesInParliamentTable {partiesInParliament} {lookup} />
+        <h2 class="govuk-heading-l text-center mb-3">Poslanci</h2>
+        <CandidatesTable data={candidates.sort((a, b) => b.doc_count - a.doc_count)} {lookup} />
     </div>
 </div>
 
