@@ -186,12 +186,15 @@
             selectedLocalityLabel =
                 lookup.municipalities[selectedMunicipality].name;
             filter_type = "municipality";
+            filter_value = selectedMunicipality;
         } else if (selectedCounty != "") {
             selectedLocalityLabel = lookup.counties[selectedCounty].name;
             filter_type = "county";
+            filter_value = selectedCounty;
         } else if (selectedRegion != "") {
             selectedLocalityLabel = lookup.regions[selectedRegion].name;
             filter_type = "region";
+            filter_value = selectedRegion;
         } else {
             selectedLocalityLabel = "";
         }
@@ -201,6 +204,14 @@
             console.log("=======================================");
             getResultsByLocality(filter_type, filter_value).then(res => {
                 console.log(res);
+                partyResults = [... res[0].parties]
+                
+                // need to update partyResults from lookup
+                
+                // partyResults.forEach((party, index) => {
+                //     partyResults[index] = { ...party, ...lookup.parties[party.id] };
+                //     lookup.parties[partyResults[index].id] = partyResults[index];
+                // });
             })
         }
     }
@@ -243,6 +254,7 @@
     ) {
         let body = { filter_by: `${localityType}_code` };
 
+        console.log("filter_value", filter_value);
         if (filter_value) {
             body["filter_value"] = filter_value;
         }
@@ -367,8 +379,6 @@
         </div>
     </div>
 
-    <RegionalWinnersCards {lookup} {localityResultsRegions} />
-
     <div class="parties-graph mb-5">
         <div class="govuk-tabs">
             <ul class="govuk-tabs__list">
@@ -399,54 +409,62 @@
         </div>
     </div>
 
-    <div class="partliament-graph mb-5">
-        <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
-        <div class="row">
-            <div class="col-10 mx-auto" style="min-height: 300px;">
-                <ParliamentSvgMap {partiesInParliament} {lookup} />
-            </div>
-        </div>com
-    </div>
-
-    <div class="country-map mb-5">
-        <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
-
-        <div class="govuk-tabs">
-            <ul class="govuk-tabs__list">
-                <li
-                    class="govuk-tabs__list-item govuk-tabs__list-item--selected"
-                >
-                    <a class="govuk-tabs__tab" data-href="#map-tab-1" href="javascript:void(0)"> Okresy </a>
-                </li>
-                <li class="govuk-tabs__list-item">
-                    <a class="govuk-tabs__tab" data-href="#map-tab-2" href="javascript:void(0)"> Kraje </a>
-                </li>
-            </ul>
-            <section class="govuk-tabs__panel" id="map-tab-1">
-                <h2 class="govuk-heading-m">Výsledky podľa okresov</h2>
-                <SlovakiaMap
-                    mapType={"counties"}
-                    {partiesInParliament}
-                    {lookup}
-                    localityResults={localityResultsCounties}
-                    uniqueID={"2"}
-                />
-            </section>
-            <section
-                class="govuk-tabs__panel govuk-tabs__panel--hidden"
-                id="map-tab-2"
-            >
-                <h2 class="govuk-heading-m">Výsledky podľa krajov</h2>
-                <SlovakiaMap
-                    mapType={"regions"}
-                    {partiesInParliament}
-                    {lookup}
-                    localityResults={localityResultsRegions}
-                    uniqueID={"1"}
-                />
-            </section>
+    {#if (resultsFilterStep == 'region' && selectedRegion === "") }
+        <div class="partliament-graph mb-5">
+            <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
+            <div class="row">
+                <div class="col-10 mx-auto" style="min-height: 300px;">
+                    <ParliamentSvgMap {partiesInParliament} {lookup} />
+                </div>
+            </div>com
         </div>
-    </div>
+    {/if}
+
+    {#if (resultsFilterStep == 'region' && selectedRegion === "") }
+        <RegionalWinnersCards {lookup} {localityResultsRegions} />
+    {/if}
+
+    {#if resultsFilterStep == 'region' && selectedRegion === ""}
+        <div class="country-map mb-5">
+            <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
+
+            <div class="govuk-tabs">
+                <ul class="govuk-tabs__list">
+                    <li
+                        class="govuk-tabs__list-item govuk-tabs__list-item--selected"
+                    >
+                        <a class="govuk-tabs__tab" data-href="#map-tab-1" href="javascript:void(0)"> Okresy </a>
+                    </li>
+                    <li class="govuk-tabs__list-item">
+                        <a class="govuk-tabs__tab" data-href="#map-tab-2" href="javascript:void(0)"> Kraje </a>
+                    </li>
+                </ul>
+                <section class="govuk-tabs__panel" id="map-tab-1">
+                    <h2 class="govuk-heading-m">Výsledky podľa okresov</h2>
+                    <SlovakiaMap
+                        mapType={"counties"}
+                        {partiesInParliament}
+                        {lookup}
+                        localityResults={localityResultsCounties}
+                        uniqueID={"2"}
+                    />
+                </section>
+                <section
+                    class="govuk-tabs__panel govuk-tabs__panel--hidden"
+                    id="map-tab-2"
+                >
+                    <h2 class="govuk-heading-m">Výsledky podľa krajov</h2>
+                    <SlovakiaMap
+                        mapType={"regions"}
+                        {partiesInParliament}
+                        {lookup}
+                        localityResults={localityResultsRegions}
+                        uniqueID={"1"}
+                    />
+                </section>
+            </div>
+        </div>
+    {/if}
 
     <div class="elections-statistics mb-5">
         <h2 class="govuk-heading-l text-center mb-3">Všeobecné štatistiky</h2>

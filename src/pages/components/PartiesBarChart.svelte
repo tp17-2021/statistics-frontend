@@ -5,6 +5,7 @@
     export let partyResults;
     export let chartType = 'elected';
     let chartElement = null;
+    let partiesChart = null;
 
     $: watchForResultsChange = renderPartyBarChart(
         partyResults
@@ -21,7 +22,10 @@
         }
 
         var ctx = chartElement.getContext("2d");
-        new Chart(ctx, {
+        console.log("partiesChart: ", partiesChart);
+        console.log("data: ", data);
+        if (partiesChart) { partiesChart.destroy(); }
+        partiesChart = new Chart(ctx, {
             type: "bar",
             data: {
                 labels: data.map((p) => p.abbr),
