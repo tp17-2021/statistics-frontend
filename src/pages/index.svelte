@@ -18,6 +18,8 @@
     import StatisticsTable from "../pages/components/StatisticsTable.svelte";
     import RegionalWinnersCards from "../pages/components/RegionalWinnersCards.svelte";
 
+    let resultsFilterValue = null;
+    let resultsFilterStep = 'region';
     let referenceEle;
     let localityResultsCounties = null;
     let localityResultsRegions = null;
@@ -200,6 +202,57 @@
     <RegionalWinnersCards {lookup} {localityResultsRegions} />
 
     <h1 class="govuk-heading-xl mb-5">Výsledky volieb</h1>
+
+    <div class="row mb-3">
+        <div class="col-md-8 col-lg-6 mx-auto">
+            {#if resultsFilterStep == 'region'}
+                <div class="govuk-form-group mb-3">
+                    <label class="govuk-label" for="region-select">
+                    Kraj
+                    </label>
+                    <select class="govuk-select w-100" id="region-select">
+                        <option value="">0</option>
+                        {#each config.regions as region}
+                            <option value="{region.code}">{region.name}</option>
+                        {/each}
+                    </select>
+                </div>
+            {/if}
+
+            {#if resultsFilterStep == 'county'}
+                <button type="submit" class="idsk-button idsk-button--secondary mb-0" data-module="idsk-button">
+                    Späť na výber krajov
+                </button>
+              
+                <div class="govuk-form-group mb-3">
+                    <label class="govuk-label" for="county-select">
+                    Okres
+                    </label>
+                    <select class="govuk-select w-100" id="county-select">
+                        <option value="">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                    </select>
+                </div>
+            {/if}
+
+            {#if resultsFilterStep == 'municipality'}
+                <button type="submit" class="idsk-button idsk-button--secondary mb-0" data-module="idsk-button">
+                    Späť na výber okresov
+                </button>
+                <div class="govuk-form-group mb-3">
+                    <label class="govuk-label" for="numicipality-select">
+                    Obec
+                    </label>
+                    <select class="govuk-select w-100" id="numicipality-select">
+                        <option value="">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                    </select>
+                </div>
+            {/if}
+        </div>
+    </div>
 
     <div class="parties-graph mb-5">
         <div class="govuk-tabs" data-module="govuk-tabs">
