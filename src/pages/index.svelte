@@ -47,11 +47,17 @@
         nuts3_to_region_code: {},
     };
 
+
+
     onMount(async () => {
         document.body.className = document.body.className
             ? document.body.className + " js-enabled"
             : "js-enabled";
-        initAll();
+
+            setTimeout(() => {
+                initAll();
+            }, 5000);
+        
 
         config = (await axios.get("api/config.json")).data;
         lau1_map = (await axios.get("api/lau1_codes.json")).data;
@@ -161,6 +167,16 @@
         });
         localityResultsRegions = tmp;
         console.log("localityResultsRegions", localityResultsRegions);
+
+        // fix routify error by implementing tab switching logic by ourselves
+        JQ(".govuk-tabs__tab").click(function () {
+            let hash = JQ(this).data("href");
+            JQ(hash).show()
+            window.s = JQ(hash)
+            JQ(hash).parent().parent().parent().find(".govuk-tabs__panel:not(" + hash + ")").hide()
+            JQ(hash).parent().parent().find(".govuk-tabs__list-item--selected").removeClass("govuk-tabs__list-item--selected")
+            JQ('[data-href="' + hash + '"]').parent().addClass("govuk-tabs__list-item--selected")
+        });
     });
 
     $: {
@@ -354,17 +370,17 @@
     <RegionalWinnersCards {lookup} {localityResultsRegions} />
 
     <div class="parties-graph mb-5">
-        <div class="govuk-tabs" data-module="govuk-tabs">
+        <div class="govuk-tabs">
             <ul class="govuk-tabs__list">
                 <li
                     class="govuk-tabs__list-item govuk-tabs__list-item--selected"
                 >
-                    <a class="govuk-tabs__tab" href="#parties-tab-1">
+                    <a class="govuk-tabs__tab" data-href="#parties-tab-1" href="javascript:void(0)">
                         Strany nad 5%
                     </a>
                 </li>
                 <li class="govuk-tabs__list-item">
-                    <a class="govuk-tabs__tab" href="#parties-tab-2">
+                    <a class="govuk-tabs__tab" data-href="#parties-tab-2" href="javascript:void(0)">
                         Všetky strany
                     </a>
                 </li>
@@ -389,21 +405,21 @@
             <div class="col-10 mx-auto" style="min-height: 300px;">
                 <ParliamentSvgMap {partiesInParliament} {lookup} />
             </div>
-        </div>
+        </div>com
     </div>
 
     <div class="country-map mb-5">
         <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
 
-        <div class="govuk-tabs" data-module="govuk-tabs">
+        <div class="govuk-tabs">
             <ul class="govuk-tabs__list">
                 <li
                     class="govuk-tabs__list-item govuk-tabs__list-item--selected"
                 >
-                    <a class="govuk-tabs__tab" href="#map-tab-1"> Okresy </a>
+                    <a class="govuk-tabs__tab" data-href="#map-tab-1" href="javascript:void(0)"> Okresy </a>
                 </li>
                 <li class="govuk-tabs__list-item">
-                    <a class="govuk-tabs__tab" href="#map-tab-2"> Kraje </a>
+                    <a class="govuk-tabs__tab" data-href="#map-tab-2" href="javascript:void(0)"> Kraje </a>
                 </li>
             </ul>
             <section class="govuk-tabs__panel" id="map-tab-1">
