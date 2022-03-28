@@ -172,8 +172,8 @@
         JQ(".govuk-tabs__tab").click(function () {
             let hash = JQ(this).data("href");
             JQ(hash).show()
-            window.s = JQ(hash)
-            JQ(hash).parent().parent().parent().find(".govuk-tabs__panel:not(" + hash + ")").hide()
+            // window.s = JQ(hash)
+            JQ(hash).parent().find(".govuk-tabs__panel:not(" + hash + ")").hide()
             JQ(hash).parent().parent().find(".govuk-tabs__list-item--selected").removeClass("govuk-tabs__list-item--selected")
             JQ('[data-href="' + hash + '"]').parent().addClass("govuk-tabs__list-item--selected")
         });
