@@ -72,7 +72,7 @@
             <tr class="govuk-table__row">
                 <th scope="col" class="govuk-table__header">Meno</th>
                 <th scope="col" class="govuk-table__header">Strana</th>
-                <th scope="col" class="govuk-table__header">V parlamente</th>
+                <th scope="col" class="govuk-table__header">V&nbsp;parlamente</th>
                 <th
                     scope="col"
                     class="govuk-table__header govuk-table__header--numeric"
@@ -104,7 +104,7 @@
                             fill="currentColor"
                             class="bi bi-check2-circle"
                             viewBox="0 0 16 16"
-                            style="fill: green; width: 1.5rem; height: 1.5rem;"
+                            style="fill: green; width: 1.375rem; height: 1.375rem;"
                         >
                             <path
                                 d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z"

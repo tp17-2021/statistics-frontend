@@ -1,4 +1,5 @@
 <script>
+    // TODO chyba znovu vybrat ten isty kraj
     import Chart from "chart.js/auto";
     import { onMount } from "svelte";
     import axios from "axios";
@@ -17,9 +18,14 @@
     import ParliamentSvgMap from "../pages/components/ParliamentSvgMap.svelte";
     import StatisticsTable from "../pages/components/StatisticsTable.svelte";
     import RegionalWinnersCards from "../pages/components/RegionalWinnersCards.svelte";
+    import { filter } from "d3";
 
     let resultsFilterValue = null;
-    let resultsFilterStep = 'region';
+    let resultsFilterStep = "region";
+    let selectedLocalityLabel = "";
+    let selectedRegion = "";
+    let selectedCounty = "";
+    let selectedMunicipality = "";
     let referenceEle;
     let localityResultsCounties = null;
     let localityResultsRegions = null;
@@ -118,7 +124,7 @@
 
         partiesInParliament = partyResults.filter((i) => i.in_parliament);
 
-        let ttt = []
+        let ttt = [];
         partyResults.forEach((party, index) => {
             party.candidates.forEach((c) => {
                 if (c.in_parliament) {
@@ -127,8 +133,8 @@
                 candidates.push(c);
             });
         });
-        candidates = [...candidates]
-        candidatesInParliament = [...ttt]
+        candidates = [...candidates];
+        candidatesInParliament = [...ttt];
 
         console.log("partiesInParliament", partiesInParliament);
         console.log("candidates", candidates);
@@ -142,7 +148,7 @@
 
         console.log(partyResults);
         let tmp = {};
-        (await getResultsByLocality("county")).forEach((countyRes) => {
+        (await getResultsByLocality("county", null)).forEach((countyRes) => {
             tmp[countyRes.code] = countyRes;
         });
         localityResultsCounties = tmp;
@@ -150,12 +156,38 @@
         tmp = {};
         console.log("localityResultsCounties", localityResultsCounties);
 
-        (await getResultsByLocality("region")).forEach((regionRes) => {
+        (await getResultsByLocality("region", null)).forEach((regionRes) => {
             tmp[regionRes.code] = regionRes;
         });
         localityResultsRegions = tmp;
         console.log("localityResultsRegions", localityResultsRegions);
     });
+
+    $: {
+        let filter_type = "";
+        let filter_value = null;
+        if (selectedMunicipality != "") {
+            selectedLocalityLabel =
+                lookup.municipalities[selectedMunicipality].name;
+            filter_type = "municipality";
+        } else if (selectedCounty != "") {
+            selectedLocalityLabel = lookup.counties[selectedCounty].name;
+            filter_type = "county";
+        } else if (selectedRegion != "") {
+            selectedLocalityLabel = lookup.regions[selectedRegion].name;
+            filter_type = "region";
+        } else {
+            selectedLocalityLabel = "";
+        }
+
+        if (filter_type != "") {
+            // Get new nesults
+            console.log("=======================================");
+            getResultsByLocality(filter_type, filter_value).then(res => {
+                console.log(res);
+            })
+        }
+    }
 
     async function getElectionsStatus() {
         const response = await axios.get(
@@ -189,70 +221,137 @@
         }
     }
 
-    async function getResultsByLocality(localityType = "region") {
+    async function getResultsByLocality(
+        localityType = "region",
+        filter_value = null
+    ) {
+        let body = { filter_by: `${localityType}_code` };
+
+        if (filter_value) {
+            body["filter_value"] = filter_value;
+        }
+
         const response = await axios.post(
             baseApiUrl("/elastic/get-results-by-locality"),
-            { filter_by: `${localityType}_code` }
+            body
         );
         return response.data;
     }
 </script>
 
 <div class="pt-5">
-    <RegionalWinnersCards {lookup} {localityResultsRegions} />
-
-    <h1 class="govuk-heading-xl mb-5">Výsledky volieb</h1>
+    <h1 class="govuk-heading-xl mb-5">
+        Výsledky volieb - {selectedLocalityLabel}
+    </h1>
 
     <div class="row mb-3">
         <div class="col-md-8 col-lg-6 mx-auto">
-            {#if resultsFilterStep == 'region'}
+            <div>selectedRegion {selectedRegion}</div>
+            <div>selectedCounty {selectedCounty}</div>
+            <div>selectedMunicipality {selectedMunicipality}</div>
+
+            {#if resultsFilterStep == "region"}
                 <div class="govuk-form-group mb-3">
                     <label class="govuk-label" for="region-select">
-                    Kraj
+                        Kraj
                     </label>
-                    <select class="govuk-select w-100" id="region-select">
-                        <option value="">0</option>
-                        {#each config.regions as region}
-                            <option value="{region.code}">{region.name}</option>
-                        {/each}
+                    <select
+                        class="govuk-select w-100"
+                        bind:value={selectedRegion}
+                        id="region-select"
+                        on:change={() =>
+                            (resultsFilterStep = selectedRegion
+                                ? "county"
+                                : resultsFilterStep)}
+                    >
+                        <option value="">Celé Slovensko</option>
+                        {#if config}
+                            {#each config.regions as region}
+                                <option value={region.code}
+                                    >{region.name}</option
+                                >
+                            {/each}
+                        {/if}
                     </select>
                 </div>
             {/if}
 
-            {#if resultsFilterStep == 'county'}
-                <button type="submit" class="idsk-button idsk-button--secondary mb-0" data-module="idsk-button">
+            {#if resultsFilterStep == "county"}
+                <button
+                    type="submit"
+                    class="idsk-button idsk-button--secondary mb-0"
+                    data-module="idsk-button"
+                    on:click={() => {
+                        resultsFilterStep = "region";
+                        selectedCounty = "";
+                        selectedMunicipality = "";
+                    }}
+                >
                     Späť na výber krajov
                 </button>
-              
+
                 <div class="govuk-form-group mb-3">
                     <label class="govuk-label" for="county-select">
-                    Okres
+                        Okres
                     </label>
-                    <select class="govuk-select w-100" id="county-select">
-                        <option value="">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
+                    <select
+                        bind:value={selectedCounty}
+                        class="govuk-select w-100"
+                        id="county-select"
+                        on:change={() => {
+                            resultsFilterStep = selectedCounty
+                                ? "municipality"
+                                : resultsFilterStep;
+                        }}
+                    >
+                        <option value="">Celý kraj</option>
+                        {#if config && selectedRegion}
+                            {#each config.counties.filter((c) => c.region_code == selectedRegion) as county}
+                                <option value={county.code}
+                                    >{county.name}</option
+                                >
+                            {/each}
+                        {/if}
                     </select>
                 </div>
             {/if}
 
-            {#if resultsFilterStep == 'municipality'}
-                <button type="submit" class="idsk-button idsk-button--secondary mb-0" data-module="idsk-button">
+            {#if resultsFilterStep == "municipality"}
+                <button
+                    type="submit"
+                    class="idsk-button idsk-button--secondary mb-0"
+                    data-module="idsk-button"
+                    on:click={() => {
+                        resultsFilterStep = "county";
+                        selectedMunicipality = "";
+                    }}
+                >
                     Späť na výber okresov
                 </button>
                 <div class="govuk-form-group mb-3">
                     <label class="govuk-label" for="numicipality-select">
-                    Obec
+                        Obec
                     </label>
-                    <select class="govuk-select w-100" id="numicipality-select">
-                        <option value="">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
+                    <select
+                        bind:value={selectedMunicipality}
+                        class="govuk-select w-100"
+                        id="numicipality-select"
+                    >
+                        <option value="">Celý okres</option>
+                        {#if config && selectedCounty}
+                            {#each config.municipalities.filter((m) => m.county_code == selectedCounty) as municipality}
+                                <option value={municipality.code}
+                                    >{municipality.name}</option
+                                >
+                            {/each}
+                        {/if}
                     </select>
                 </div>
             {/if}
         </div>
     </div>
+
+    <RegionalWinnersCards {lookup} {localityResultsRegions} />
 
     <div class="parties-graph mb-5">
         <div class="govuk-tabs" data-module="govuk-tabs">
@@ -345,7 +444,10 @@
 
     <div class="candidates-table mb-5">
         <h2 class="govuk-heading-l text-center mb-3">Poslanci</h2>
-        <CandidatesTable data={candidates.sort((a, b) => b.doc_count - a.doc_count)} {lookup} />
+        <CandidatesTable
+            data={candidates.sort((a, b) => b.doc_count - a.doc_count)}
+            {lookup}
+        />
     </div>
 </div>
 
