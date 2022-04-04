@@ -47,17 +47,14 @@
         nuts3_to_region_code: {},
     };
 
-
-
     onMount(async () => {
         document.body.className = document.body.className
             ? document.body.className + " js-enabled"
             : "js-enabled";
 
-            setTimeout(() => {
-                initAll();
-            }, 5000);
-        
+        setTimeout(() => {
+            initAll();
+        }, 5000);
 
         config = (await axios.get("api/config.json")).data;
         lau1_map = (await axios.get("api/lau1_codes.json")).data;
@@ -103,22 +100,26 @@
         );
 
         partyResults = await getPartyResults();
-        partyResults.forEach((party, index) => {
-            party.candidates.forEach((candidate, c_index) => {
-                // Add whole object to results retrieved from elastic
-                party.candidates[c_index] = {
-                    ...candidate,
-                    ...lookup.candidates[candidate.id],
-                };
+        syncPartyResultsAndLookup();
 
-                // Also update lookup with results info
-                lookup.candidates[party.candidates[c_index].id] =
-                    party.candidates[c_index];
-            });
+        console.log("partyResults on start", partyResults);
 
-            partyResults[index] = { ...party, ...lookup.parties[party.id] };
-            lookup.parties[partyResults[index].id] = partyResults[index];
-        });
+        // partyResults.forEach((party, index) => {
+        //     party.candidates.forEach((candidate, c_index) => {
+        //         // Add whole object to results retrieved from elastic
+        //         party.candidates[c_index] = {
+        //             ...candidate,
+        //             ...lookup.candidates[candidate.id],
+        //         };
+
+        //         // Also update lookup with results info
+        //         lookup.candidates[party.candidates[c_index].id] =
+        //             party.candidates[c_index];
+        //     });
+
+        //     partyResults[index] = { ...party, ...lookup.parties[party.id] };
+        //     lookup.parties[partyResults[index].id] = partyResults[index];
+        // });
 
         lau1_map.forEach((loc) => {
             lookup.lau1_to_code[loc.lau1_code] = loc;
@@ -171,17 +172,27 @@
         // fix routify error by implementing tab switching logic by ourselves
         JQ(".govuk-tabs__tab").click(function () {
             let hash = JQ(this).data("href");
-            JQ(hash).show()
+            JQ(hash).show();
             // window.s = JQ(hash)
-            JQ(hash).parent().find(".govuk-tabs__panel:not(" + hash + ")").hide()
-            JQ(hash).parent().parent().find(".govuk-tabs__list-item--selected").removeClass("govuk-tabs__list-item--selected")
-            JQ('[data-href="' + hash + '"]').parent().addClass("govuk-tabs__list-item--selected")
+            JQ(hash)
+                .parent()
+                .find(".govuk-tabs__panel:not(" + hash + ")")
+                .hide();
+            JQ(hash)
+                .parent()
+                .parent()
+                .find(".govuk-tabs__list-item--selected")
+                .removeClass("govuk-tabs__list-item--selected");
+            JQ('[data-href="' + hash + '"]')
+                .parent()
+                .addClass("govuk-tabs__list-item--selected");
         });
     });
 
-    $: {
+    async function onFilterValueChange(selectedMunicipality, selectedCounty, selectedRegion){
         let filter_type = "";
-        let filter_value = null;
+        let filter_value = "";
+
         if (selectedMunicipality != "") {
             selectedLocalityLabel =
                 lookup.municipalities[selectedMunicipality].name;
@@ -202,18 +213,69 @@
         if (filter_type != "") {
             // Get new nesults
             console.log("=======================================");
-            getResultsByLocality(filter_type, filter_value).then(res => {
-                console.log(res);
-                partyResults = [... res[0].parties]
-                
+            getResultsByLocality(filter_type, filter_value).then((res) => {
+                console.log("res from getResultsByLocality", res);
+                // partyResults = [...res[0].parties];
+                console.log(
+                    "first party doc count",
+                    res[0].parties[0].doc_count
+                );
                 // need to update partyResults from lookup
-                
-                // partyResults.forEach((party, index) => {
-                //     partyResults[index] = { ...party, ...lookup.parties[party.id] };
-                //     lookup.parties[partyResults[index].id] = partyResults[index];
-                // });
-            })
+                let synced = fillLookupDataToFilteredResults(res[0].parties);
+                console.log(
+                    "first party doc count after update",
+                    synced[0].doc_count
+                );
+                partyResults = [...synced];
+                console.log("partyResults new", synced);
+                // syncPartyResultsAndLookup();
+            });
+        } else {
+            partyResults = await getPartyResults();
+            syncPartyResultsAndLookup();
         }
+    }
+
+    $: onFilterValueChange(selectedMunicipality, selectedCounty, selectedRegion);
+
+    // On init sync info inside results and lookup for whole data
+    function syncPartyResultsAndLookup() {
+        console.log("syncPartyResultsAndLookup");
+        partyResults.forEach((party, index) => {
+            party.candidates.forEach((candidate, c_index) => {
+                // Add whole object to results retrieved from elastic
+                party.candidates[c_index] = {
+                    ...candidate,
+                    ...lookup.candidates[candidate.id],
+                };
+
+                // Also update lookup with results info
+                lookup.candidates[party.candidates[c_index].id] =
+                    party.candidates[c_index];
+            });
+
+            partyResults[index] = { ...party, ...lookup.parties[party.id] };
+            lookup.parties[partyResults[index].id] = partyResults[index];
+        });
+    }
+
+    // complete the newly fetched locality results by data from config
+    function fillLookupDataToFilteredResults(results) {
+        results.forEach((party, index) => {
+            party.candidates.forEach((candidate, c_index) => {
+                // Add whole object to results retrieved from elastic
+                party.candidates[c_index] = {
+                    ...lookup.candidates[candidate.id],
+                    ...candidate,
+                };
+
+                // Also update lookup with results info
+                lookup.candidates[party.candidates[c_index].id] =
+                    party.candidates[c_index];
+            });
+            results[index] = { ...lookup.parties[party.id], ...party };
+        });
+        return results;
     }
 
     async function getElectionsStatus() {
@@ -253,7 +315,7 @@
         filter_value = null
     ) {
         let body = { filter_by: `${localityType}_code` };
-
+        console.log("getResultsByLocality", localityType, filter_value);
         console.log("filter_value", filter_value);
         if (filter_value) {
             body["filter_value"] = filter_value;
@@ -273,109 +335,83 @@
     </h1>
 
     <div class="row mb-3">
-        <div class="col-md-8 col-lg-6 mx-auto">
-            <div>selectedRegion {selectedRegion}</div>
-            <div>selectedCounty {selectedCounty}</div>
-            <div>selectedMunicipality {selectedMunicipality}</div>
+        <div>selectedRegion {selectedRegion}</div>
+        <div>selectedCounty {selectedCounty}</div>
+        <div>selectedMunicipality {selectedMunicipality}</div>
 
-            {#if resultsFilterStep == "region"}
-                <div class="govuk-form-group mb-3">
-                    <label class="govuk-label" for="region-select">
-                        Kraj
-                    </label>
-                    <select
-                        class="govuk-select w-100"
-                        bind:value={selectedRegion}
-                        id="region-select"
-                        on:change={() =>
-                            (resultsFilterStep = selectedRegion
-                                ? "county"
-                                : resultsFilterStep)}
-                    >
-                        <option value="">Celé Slovensko</option>
-                        {#if config}
-                            {#each config.regions as region}
-                                <option value={region.code}
-                                    >{region.name}</option
-                                >
-                            {/each}
-                        {/if}
-                    </select>
-                </div>
-            {/if}
-
-            {#if resultsFilterStep == "county"}
-                <button
-                    type="submit"
-                    class="idsk-button idsk-button--secondary mb-0"
-                    data-module="idsk-button"
-                    on:click={() => {
-                        resultsFilterStep = "region";
+        <div class="col-12 col-lg-4">
+            <div class="govuk-form-group mb-3">
+                <label class="govuk-label" for="region-select"> Kraj </label>
+                <select
+                    class="govuk-select w-100"
+                    bind:value={selectedRegion}
+                    id="region-select"
+                    on:change={() => {
+                        resultsFilterStep = selectedRegion
+                            ? "county"
+                            : resultsFilterStep;
                         selectedCounty = "";
                         selectedMunicipality = "";
                     }}
                 >
-                    Späť na výber krajov
-                </button>
+                    <option value="">Celé Slovensko</option>
+                    {#if config}
+                        {#each config.regions as region}
+                            <option value={region.code}>{region.name}</option>
+                        {/each}
+                    {/if}
+                </select>
+            </div>
+        </div>
 
-                <div class="govuk-form-group mb-3">
-                    <label class="govuk-label" for="county-select">
-                        Okres
-                    </label>
-                    <select
-                        bind:value={selectedCounty}
-                        class="govuk-select w-100"
-                        id="county-select"
-                        on:change={() => {
-                            resultsFilterStep = selectedCounty
-                                ? "municipality"
-                                : resultsFilterStep;
-                        }}
-                    >
-                        <option value="">Celý kraj</option>
-                        {#if config && selectedRegion}
-                            {#each config.counties.filter((c) => c.region_code == selectedRegion) as county}
-                                <option value={county.code}
-                                    >{county.name}</option
-                                >
-                            {/each}
-                        {/if}
-                    </select>
-                </div>
-            {/if}
-
-            {#if resultsFilterStep == "municipality"}
-                <button
-                    type="submit"
-                    class="idsk-button idsk-button--secondary mb-0"
-                    data-module="idsk-button"
-                    on:click={() => {
-                        resultsFilterStep = "county";
+        <div class="col-12 col-lg-4">
+            <div class="govuk-form-group mb-3">
+                <label class="govuk-label" for="county-select"> Okres </label>
+                <select
+                    bind:value={selectedCounty}
+                    disabled={resultsFilterStep == "region" || null}
+                    class="govuk-select w-100"
+                    id="county-select"
+                    on:change={() => {
+                        resultsFilterStep = selectedCounty
+                            ? "municipality"
+                            : resultsFilterStep;
                         selectedMunicipality = "";
                     }}
                 >
-                    Späť na výber okresov
-                </button>
-                <div class="govuk-form-group mb-3">
-                    <label class="govuk-label" for="numicipality-select">
-                        Obec
-                    </label>
-                    <select
-                        bind:value={selectedMunicipality}
-                        class="govuk-select w-100"
-                        id="numicipality-select"
-                    >
-                        <option value="">Celý okres</option>
-                        {#if config && selectedCounty}
-                            {#each config.municipalities.filter((m) => m.county_code == selectedCounty) as municipality}
-                                <option value={municipality.code}
-                                    >{municipality.name}</option
-                                >
-                            {/each}
-                        {/if}
-                    </select>
-                </div>
-            {/if}
+                    <option value="">Celý kraj</option>
+                    {#if config && selectedRegion}
+                        {#each config.counties.filter((c) => c.region_code == selectedRegion) as county}
+                            <option value={county.code}>{county.name}</option>
+                        {/each}
+                    {/if}
+                </select>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="govuk-form-group mb-3">
+                <label class="govuk-label" for="numicipality-select">
+                    Obec
+                </label>
+                <select
+                    disabled={resultsFilterStep == "region" ||
+                        resultsFilterStep == "county" ||
+                        null}
+                    bind:value={selectedMunicipality}
+                    class="govuk-select w-100"
+                    id="numicipality-select"
+                >
+                    <option value="">Celý okres</option>
+                    {#if config && selectedCounty}
+                        {#each config.municipalities.filter((m) => m.county_code == selectedCounty) as municipality}
+                            <option value={municipality.code}
+                                >{municipality.name}</option
+                            >
+                        {/each}
+                    {/if}
+                </select>
+            </div>
         </div>
     </div>
 
@@ -385,12 +421,20 @@
                 <li
                     class="govuk-tabs__list-item govuk-tabs__list-item--selected"
                 >
-                    <a class="govuk-tabs__tab" data-href="#parties-tab-1" href="javascript:void(0)">
+                    <a
+                        class="govuk-tabs__tab"
+                        data-href="#parties-tab-1"
+                        href="javascript:void(0)"
+                    >
                         Strany nad 5%
                     </a>
                 </li>
                 <li class="govuk-tabs__list-item">
-                    <a class="govuk-tabs__tab" data-href="#parties-tab-2" href="javascript:void(0)">
+                    <a
+                        class="govuk-tabs__tab"
+                        data-href="#parties-tab-2"
+                        href="javascript:void(0)"
+                    >
                         Všetky strany
                     </a>
                 </li>
@@ -409,22 +453,24 @@
         </div>
     </div>
 
-    {#if (resultsFilterStep == 'region' && selectedRegion === "") }
+    {#if resultsFilterStep == "region" && selectedRegion === ""}
         <div class="partliament-graph mb-5">
-            <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
+            <h2 class="govuk-heading-l text-center mb-3">
+                Rozloženie parlamentu
+            </h2>
             <div class="row">
                 <div class="col-10 mx-auto" style="min-height: 300px;">
                     <ParliamentSvgMap {partiesInParliament} {lookup} />
                 </div>
-            </div>com
+            </div>
         </div>
     {/if}
 
-    {#if (resultsFilterStep == 'region' && selectedRegion === "") }
+    {#if resultsFilterStep == "region" && selectedRegion === ""}
         <RegionalWinnersCards {lookup} {localityResultsRegions} />
     {/if}
 
-    {#if resultsFilterStep == 'region' && selectedRegion === ""}
+    {#if resultsFilterStep == "region" && selectedRegion === ""}
         <div class="country-map mb-5">
             <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
 
@@ -433,10 +479,22 @@
                     <li
                         class="govuk-tabs__list-item govuk-tabs__list-item--selected"
                     >
-                        <a class="govuk-tabs__tab" data-href="#map-tab-1" href="javascript:void(0)"> Okresy </a>
+                        <a
+                            class="govuk-tabs__tab"
+                            data-href="#map-tab-1"
+                            href="javascript:void(0)"
+                        >
+                            Okresy
+                        </a>
                     </li>
                     <li class="govuk-tabs__list-item">
-                        <a class="govuk-tabs__tab" data-href="#map-tab-2" href="javascript:void(0)"> Kraje </a>
+                        <a
+                            class="govuk-tabs__tab"
+                            data-href="#map-tab-2"
+                            href="javascript:void(0)"
+                        >
+                            Kraje
+                        </a>
                     </li>
                 </ul>
                 <section class="govuk-tabs__panel" id="map-tab-1">
