@@ -1,5 +1,6 @@
 <script>
     // TODO chyba znovu vybrat ten isty kraj
+    // TODO, filtrovanie podla strany v tabulke kandidatov
     import Chart from "chart.js/auto";
     import { onMount } from "svelte";
     import axios from "axios";
@@ -18,6 +19,7 @@
     import ParliamentSvgMap from "../pages/components/ParliamentSvgMap.svelte";
     import StatisticsTable from "../pages/components/StatisticsTable.svelte";
     import RegionalWinnersCards from "../pages/components/RegionalWinnersCards.svelte";
+
     import { filter } from "d3";
 
     let resultsFilterValue = null;
@@ -335,10 +337,6 @@
     </h1>
 
     <div class="row mb-3">
-        <div>selectedRegion {selectedRegion}</div>
-        <div>selectedCounty {selectedCounty}</div>
-        <div>selectedMunicipality {selectedMunicipality}</div>
-
         <div class="col-12 col-lg-4">
             <div class="govuk-form-group mb-3">
                 <label class="govuk-label" for="region-select"> Kraj </label>

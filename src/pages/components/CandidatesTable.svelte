@@ -6,6 +6,7 @@
     import { searchAndPaginate } from "../../lib/components/pagination/paginate";
     import PaginationLinks from "../../lib/components/pagination/PaginationLinks.svelte";
     import type { IpaginationObject } from "../../lib/components/pagination/paginate";
+    import SvelteTooltip from 'svelte-tooltip';
 
     // // --- pagination and search ---
     let paginationObject: IpaginationObject = {
@@ -92,8 +93,12 @@
                     <td class="govuk-table__cell"
                         >{getCandidateFullName(candidate)}</td
                     >
-                    <td class="govuk-table__cell"
-                        >{lookup.parties[candidate.party_number - 1].abbr}</td
+                    <td class="govuk-table__cell" data-bs-toggle="tooltip" data-bs-placement="top" title="Tooltip on top"
+                        >
+                        <SvelteTooltip tip={lookup.parties[candidate.party_number - 1].name} top color="#FFFFFF" >
+                            {lookup.parties[candidate.party_number - 1].abbr}
+                        </SvelteTooltip>
+                        </td
                     >
                     <td class="govuk-table__cell text-center">
                         {#if candidate.in_parliament}
