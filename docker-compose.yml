@@ -7,5 +7,6 @@ services:
       dockerfile: ./Dockerfile
       args:
         vite_base_path: /stats
+        vite_api_base_path: https://team17-21.studenti.fiit.stuba.sk/server/
     ports:
       - 8104:80

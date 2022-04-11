@@ -10,6 +10,8 @@ RUN npm install
 COPY . ./
 ARG vite_base_path
 ENV VITE_BASE_PATH=$vite_base_path
+ARG vite_api_base_path
+ENV VITE_API_BASE_PATH=$vite_api_base_path
 # ENV VITE_BASE_PATH='/app'
 RUN echo $vite_base_path > /app/.env.production
 RUN npm run build
