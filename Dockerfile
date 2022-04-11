@@ -1,5 +1,5 @@
 # first build the static files for FE
-FROM node:16 AS build
+FROM node:16.14 AS build
 
 WORKDIR /app
 
