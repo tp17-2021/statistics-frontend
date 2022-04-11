@@ -6,8 +6,8 @@ export const abbr = function(x, count = 4) {
     return text;
 }
 
-let base = (
-    import.meta.env.API_BASE_PATH || "http://localhost:8222");
+var base = (
+    import.meta.env.VITE_API_BASE_PATH || "http://localhost:8222");
 export const baseApiUrl = function(path) {
     // let base = "http://localhost:8222";
     return `${base}${path}`;
