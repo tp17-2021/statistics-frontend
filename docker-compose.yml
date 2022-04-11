@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  stats-frontend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        vite_base_path: /stats
+    ports:
+      - 8104:80
