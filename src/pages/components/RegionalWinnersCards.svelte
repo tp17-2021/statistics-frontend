@@ -21,7 +21,7 @@
 </script>
 
 <section class="regional-winners-cards-content mb-5" >
-    <h1 class="text-center mb-3">TAbles per region, clicable calls filter ...</h1>
+    <h1 class="text-center mb-3">Výsledky v krajoch</h1>
     <div class="wrapper">
         <div class="row">
             {#each data as region_data, i}

@@ -19,6 +19,12 @@ Run application
 npm run dev
 ```
 
+# Docker build
+```sh
+docker build -t statistics-frontend .
+docker run --name statistics-frontend  -p 8888:80 statistics-frontend
+```
+
 # Problem localhost not working in some browsers
 Sometimes there are problems with chrome or safari. Try accessing the app in firefox on localhost or 127.0.0.1 (Try both!)
 

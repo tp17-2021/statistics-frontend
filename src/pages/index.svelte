@@ -24,7 +24,7 @@
 
     let resultsFilterValue = null;
     let resultsFilterStep = "region";
-    let selectedLocalityLabel = "";
+    let selectedLocalityLabel = "Celé Slovensko";
     let selectedRegion = "";
     let selectedCounty = "";
     let selectedMunicipality = "";
@@ -209,7 +209,7 @@
             filter_type = "region";
             filter_value = selectedRegion;
         } else {
-            selectedLocalityLabel = "";
+            selectedLocalityLabel = "Celé Slovensko";
         }
 
         if (filter_type != "") {
