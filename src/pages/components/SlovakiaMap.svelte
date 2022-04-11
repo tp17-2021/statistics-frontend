@@ -21,7 +21,8 @@
     
     import Chart from "chart.js/auto";
     import axios from "axios";
-    import * as JQ from "jquery";
+    import * as JQProxy from "jquery";
+    const JQ = (JQProxy).default || JQProxy;
     
     // import * as d3 from "d3";
     // import {geoPath} from 'd3-geo';
