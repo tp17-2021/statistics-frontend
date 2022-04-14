@@ -2,12 +2,14 @@
 ### Statistics frontend
 
 # Config import
-While having server running, you need to first download copy of config file with following command. 
+While having server running, you need to first download copy of config file with following command.
 ```sh
 curl http://localhost:8222/elections/voting-data > config.json
 ```
 
 # Get started
+
+Make sure [server](https://github.com/tp17-2021/server) is running
 
 Install libraries
 ```sh
@@ -21,6 +23,7 @@ npm run dev
 
 # Docker build
 ```sh
+docker rm statistics-frontend
 docker build -t statistics-frontend .
 docker run --name statistics-frontend  -p 8888:80 statistics-frontend
 ```

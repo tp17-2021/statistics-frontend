@@ -1,12 +1,10 @@
-<script>
+<script lang="ts">
   // TODO chyba znovu vybrat ten isty kraj
   // TODO, filtrovanie podla strany v tabulke kandidatov
-  import Chart from "chart.js/auto";
   import { onMount } from "svelte";
   import axios from "axios";
   import * as JQProxy from "jquery";
   const JQ = JQProxy.default || JQProxy;
-  import * as d3 from "d3";
 
   import { abbr, baseApiUrl } from "../lib/helpers/helpers.js";
 
@@ -23,6 +21,9 @@
 
   import { filter } from "d3";
 
+  // types and interfaces
+  import type {IConfig, ILau1, ILookup} from "./types";
+
   let resultsFilterValue = null;
   let resultsFilterStep = "region";
   let selectedLocalityLabel = "Celé Slovensko";
@@ -37,32 +38,20 @@
   let partiesInParliament = [];
   let candidates = [];
   let candidatesInParliament = [];
-  let config = null;
-  let lau1_map = null;
-  let lookup = {
-    parties: {},
-    candidates: {},
-    municipalities: {},
-    counties: {},
-    regions: {},
+  let config: IConfig = null;
+  let lau1_map: ILau1 = null;
+  let lookup: ILookup = {
+    parties: [],
+    candidates: [],
+    municipalities: [],
+    counties: [],
+    regions: [],
     lau1_to_code: {},
     code_to_lau1: {},
     nuts3_to_region_code: {},
   };
 
-  onMount(async () => {
-    document.body.className = document.body.className
-      ? document.body.className + " js-enabled"
-      : "js-enabled";
-
-    setTimeout(() => {
-      initAll();
-    }, 5000);
-
-    config = (await axios.get("api/config.json")).data;
-    lau1_map = (await axios.get("api/lau1_codes.json")).data;
-    console.log("config", config);
-    console.log("lau1_map", lau1_map);
+  function createLookup(config) {
     config.parties.forEach((party) => {
       let partyWithoutCandidates = Object.assign({}, party);
       delete partyWithoutCandidates.candidates;
@@ -98,9 +87,25 @@
     };
 
     console.log(
-      "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
-      lookup.counties["217"]
+            "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
+            lookup.counties["217"]
     );
+
+    console.log("lookup", lookup)
+
+    return lookup;
+  }
+
+  onMount(async () => {
+    document.body.className = document.body.className
+      ? document.body.className + " js-enabled"
+      : "js-enabled";
+
+    config = (await axios.get("api/config.json")).data;
+    lau1_map = (await axios.get("api/lau1_codes.json")).data;
+    console.log("config", config);
+    console.log("lau1_map", lau1_map);
+    lookup = createLookup(config, lau1_map);
 
     partyResults = await getPartyResults();
     syncPartyResultsAndLookup();
@@ -190,6 +195,8 @@
         .parent()
         .addClass("govuk-tabs__list-item--selected");
     });
+
+    initAll();
   });
 
   async function onFilterValueChange(
@@ -525,5 +532,3 @@
   </div>
 </div>
 
-<style lang="scss">
-</style>
