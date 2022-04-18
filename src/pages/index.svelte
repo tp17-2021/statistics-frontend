@@ -24,6 +24,7 @@
   // types and interfaces
   import type {IConfig, ILau1, ILookup, IPartyResult} from "./types";
   import {fetchConfig, fetchLau1, fetchPartyResults} from "../lib/api";
+  import RegionSelector from "./components/RegionSelector.svelte";
 
   let electionStatusLoading = false;
   let resultsFilterValue = null;
@@ -337,76 +338,17 @@
     Výsledky volieb - {selectedLocalityLabel}
   </h1>
 
-  <div class="row mb-3">
-    <div class="col-12 col-lg-4">
-      <div class="govuk-form-group mb-3">
-        <label class="govuk-label" for="region-select"> Kraj </label>
-        <select
-          class="govuk-select w-100"
-          bind:value={selectedRegion}
-          id="region-select"
-          on:change={() => {
-            resultsFilterStep = selectedRegion ? "county" : resultsFilterStep;
-            selectedCounty = "";
-            selectedMunicipality = "";
-          }}
-        >
-          <option value="">Celé Slovensko</option>
-          {#if config}
-            {#each config.regions as region}
-              <option value={region.code}>{region.name}</option>
-            {/each}
-          {/if}
-        </select>
-      </div>
-    </div>
-
-    <div class="col-12 col-lg-4">
-      <div class="govuk-form-group mb-3">
-        <label class="govuk-label" for="county-select"> Okres </label>
-        <select
-          bind:value={selectedCounty}
-          disabled={resultsFilterStep == "region" || null}
-          class="govuk-select w-100"
-          id="county-select"
-          on:change={() => {
-            resultsFilterStep = selectedCounty
-              ? "municipality"
-              : resultsFilterStep;
-            selectedMunicipality = "";
-          }}
-        >
-          <option value="">Celý kraj</option>
-          {#if config && selectedRegion}
-            {#each config.counties.filter((c) => c.region_code == selectedRegion) as county}
-              <option value={county.code}>{county.name}</option>
-            {/each}
-          {/if}
-        </select>
-      </div>
-    </div>
-
-    <div class="col-12 col-lg-4">
-      <div class="govuk-form-group mb-3">
-        <label class="govuk-label" for="numicipality-select"> Obec </label>
-        <select
-          disabled={resultsFilterStep == "region" ||
-            resultsFilterStep == "county" ||
-            null}
-          bind:value={selectedMunicipality}
-          class="govuk-select w-100"
-          id="numicipality-select"
-        >
-          <option value="">Celý okres</option>
-          {#if config && selectedCounty}
-            {#each config.municipalities.filter((m) => m.county_code == selectedCounty) as municipality}
-              <option value={municipality.code}>{municipality.name}</option>
-            {/each}
-          {/if}
-        </select>
-      </div>
-    </div>
-  </div>
+  {#if config}
+    <RegionSelector
+      REGIONS={config.regions}
+      COUNTRIES={config.counties}
+      MUNICIPALITIES={config.municipalities}
+      bind:selectedRegion={selectedRegion}
+      bind:selectedCounty={selectedCounty}
+      bind:selectedMunicipality={selectedMunicipality}
+      onFilterValueChange={onFilterValueChange}
+    />
+  {/if}
 
   <div class="parties-graph mb-5">
     <div class="govuk-tabs">
@@ -449,7 +391,7 @@
       <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
       <div class="row">
         <div class="col-10 mx-auto" style="min-height: 300px;">
-          <ParliamentSvgMap {partiesInParliament} {lookup} />
+<!--          <ParliamentSvgMap {partiesInParliament} {lookup} />-->
         </div>
       </div>
     </div>
