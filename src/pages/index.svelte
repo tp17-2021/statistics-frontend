@@ -250,7 +250,7 @@
     } else {
       partyResults = await fetchPartyResults();
       electionsStatus = await getElectionsStatus();
-      syncPartyResultsAndLookup();
+      syncPartyResultsAndLookup(partyResults, lookup);
     }
   }
 
@@ -386,16 +386,14 @@
     </div>
   </div>
 
-  {#if resultsFilterStep == "region" && selectedRegion === ""}
-    <div class="partliament-graph mb-5">
-      <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
-      <div class="row">
-        <div class="col-10 mx-auto" style="min-height: 300px;">
-<!--          <ParliamentSvgMap {partiesInParliament} {lookup} />-->
-        </div>
+  <div class="partliament-graph mb-5 {(resultsFilterStep == 'region' && selectedRegion === '') ? '' : 'd-none'}">
+    <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
+    <div class="row">
+      <div class="col-10 mx-auto" style="min-height: 300px;">
+        <ParliamentSvgMap {partiesInParliament} {lookup} />
       </div>
     </div>
-  {/if}
+  </div>
 
   {#if resultsFilterStep == "region" && selectedRegion === ""}
     <RegionalWinnersCards {lookup} {localityResultsRegions} />

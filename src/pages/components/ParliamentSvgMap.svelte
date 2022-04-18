@@ -1,7 +1,7 @@
 <script>
   export let partiesInParliament;
   export let lookup;
-  import { onMount } from "svelte";
+  import {onDestroy, onMount} from "svelte";
   import * as JQProxy from "jquery";
   const JQ = (JQProxy).default || JQProxy;
   import * as d3 from "d3";
@@ -11,6 +11,10 @@
     // console.log("Parliament map on mount");
     // console.log(partiesInParliament);
     setUpParliamentDiagramResults(partiesInParliament);
+  });
+
+  onDestroy(() => {
+    JQ("#parliament-map").empty();
   });
 
   $: {
