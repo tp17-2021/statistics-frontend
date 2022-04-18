@@ -7,29 +7,27 @@
   import * as d3 from "d3";
   import { abbr, getCandidateFullName } from "../../lib/helpers/helpers.js";
 
-  onMount(async () => {
-    // console.log("Parliament map on mount");
-    // console.log(partiesInParliament);
-    setUpParliamentDiagramResults(partiesInParliament);
-  });
+  let parliamentMapWrapperWidth;
 
   onDestroy(() => {
-    JQ("#parliament-map").empty();
+    JQ(parliamentMap).empty();
   });
 
-  $: {
-    setUpParliamentDiagramResults(partiesInParliament);
-  }
+  $: setUpParliamentDiagramResults(partiesInParliament, parliamentMapWrapperWidth);
+
+  // $: console.log("parliamentMapWrapperWidth", parliamentMapWrapperWidth);
 
   function setUpParliamentDiagramResults(partiesInParliament) {
+    JQ(parliamentMap).empty();
     if (!partiesInParliament.length) {
       return;
     }
 
-    var JQparliament_wrapper = JQ("#parliament-map");
+    let JQparliamentMap = JQ(parliamentMap);
+    let JQparliamentMapWrapper = JQ(parliamentMapWrapper);
 
-    var w = JQparliament_wrapper.parent().width(),
-      h = Math.floor(JQparliament_wrapper.parent().width() * 0.7),
+    let w = JQparliamentMapWrapper.width(),
+      h = Math.floor(JQparliamentMapWrapper.width() * 0.7),
       d = Math.min(w, h * 1.5),
       r0 = d * 0.2,
       r1 = d * 0.45,
@@ -218,10 +216,14 @@
         return tooltip.style("visibility", "hidden");
       });
   }
+
+  // DOM variables:
+  let parliamentMapWrapper;
+  let parliamentMap;
 </script>
 
-<div id="parliament-map-wrapper">
-  <div id="parliament-map" />
+<div id="parliament-map-wrapper" bind:this={parliamentMapWrapper} bind:clientWidth={parliamentMapWrapperWidth}>
+  <div id="parliament-map" bind:this={parliamentMap}></div>
 </div>
 
 <div id="parliament-map-legend">

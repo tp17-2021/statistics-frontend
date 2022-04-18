@@ -388,6 +388,7 @@
     </div>
   </div>
 
+  <!--{#if resultsFilterStep === 'region' && selectedRegion === null}-->
   <div class="partliament-graph mb-5 {(resultsFilterStep === 'region' && selectedRegion === null) ? '' : 'd-none'}">
     <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
     <div class="row">
@@ -396,6 +397,7 @@
       </div>
     </div>
   </div>
+  <!--{/if}-->
 
   {#if resultsFilterStep === "region" && selectedRegion === ""}
     <RegionalWinnersCards {lookup} {localityResultsRegions} />
