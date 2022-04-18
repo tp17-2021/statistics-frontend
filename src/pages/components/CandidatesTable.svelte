@@ -61,6 +61,7 @@
         </div>
     </div>
 
+    <div class="table-overflow-wrapper">
     <table class="govuk-table mb-3">
         <colgroup>
             <col style="width:30%" />
@@ -132,6 +133,7 @@
             <!-- {/each} -->
         </tbody>
     </table>
+    </div>
 
     {#if paginatedCandidates.length == 0}
         <div

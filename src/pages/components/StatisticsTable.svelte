@@ -14,30 +14,32 @@
       </div>
     {/if}
 
-    <table class="govuk-table">
-      <tbody class="govuk-table__body">
-        <tr class="govuk-table__row">
-          <th class="govuk-table__cell">Volebná účasť:</th>
-          <td class="govuk-table__cell govuk-table__cell--numeric">
-            {electionsStatus.participation} %</td
-          >
-        </tr>
-        <tr class="govuk-table__row">
-          <th class="govuk-table__cell">Počet hlasov spolu:</th>
-          <td class="govuk-table__cell govuk-table__cell--numeric"
-            >{electionsStatus.total_votes}</td
-          >
-        </tr>
-        <tr class="govuk-table__row">
-          <th class="govuk-table__cell">Počet volebných miestnosti:</th>
-          <td class="govuk-table__cell govuk-table__cell--numeric">{electionsStatus.number_of_polling_places}</td>
-        </tr>
-        <tr class="govuk-table__row">
-          <th class="govuk-table__cell">Počet prázdnych hlasov:</th>
-          <td class="govuk-table__cell govuk-table__cell--numeric">TODO</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-overflow-wrapper">
+      <table class="govuk-table">
+        <tbody class="govuk-table__body">
+          <tr class="govuk-table__row">
+            <th class="govuk-table__cell">Volebná účasť:</th>
+            <td class="govuk-table__cell govuk-table__cell--numeric">
+              {electionsStatus.participation} %</td
+            >
+          </tr>
+          <tr class="govuk-table__row">
+            <th class="govuk-table__cell">Počet hlasov spolu:</th>
+            <td class="govuk-table__cell govuk-table__cell--numeric"
+              >{electionsStatus.total_votes}</td
+            >
+          </tr>
+          <tr class="govuk-table__row">
+            <th class="govuk-table__cell">Počet volebných miestnosti:</th>
+            <td class="govuk-table__cell govuk-table__cell--numeric">{electionsStatus.number_of_polling_places}</td>
+          </tr>
+          <tr class="govuk-table__row">
+            <th class="govuk-table__cell">Počet prázdnych hlasov:</th>
+            <td class="govuk-table__cell govuk-table__cell--numeric">TODO</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -60,4 +62,6 @@
     justify-content: center;
     align-items: center;
   }
+
+
 </style>

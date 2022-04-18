@@ -2,7 +2,7 @@
     export let partyResults;
 </script>
 
-<div class="parties-table">
+<div class="parties-table table-overflow-wrapper">
     <table class="govuk-table">
         <thead class="govuk-table__head">
             <tr class="govuk-table__row">
