@@ -11,11 +11,7 @@
     export let COUNTRIES: ICounty[];  // countries from config
     export let MUNICIPALITIES: IMunicipality[];  // municipalities from config
 
-    // console.log("MUNICIPALITIES", MUNICIPALITIES);
-    // console.log("COUNTRIES", COUNTRIES);
-    // console.log("REGIONS", REGIONS);
-
-    function updateLabel() {
+    function updateLabel(selectedMunicipality, selectedCounty, selectedRegion) {
         if (selectedMunicipality) {
             selectedLocalityLabel = MUNICIPALITIES.find(m => m.code === selectedMunicipality)?.name;
         }
@@ -29,7 +25,7 @@
             selectedLocalityLabel = "Celé Slovensko";
         }
     }
-
+    $: updateLabel(selectedMunicipality, selectedCounty, selectedRegion);
 
     const FILTER_STEPS = {
         REGION: 'region',
@@ -39,7 +35,7 @@
     let resultsFilterStep = FILTER_STEPS.REGION
 
     function regionChanged() {
-        console.log('regionChanged', selectedRegion)
+        console.debug('regionChanged', selectedRegion)
         if (selectedRegion) {
             resultsFilterStep = FILTER_STEPS.COUNTY
         }
@@ -48,11 +44,10 @@
         }
         selectedCounty = null
         selectedMunicipality = null
-        updateLabel()
     }
 
     function countyChanged() {
-        console.log('countyChanged', selectedCounty)
+        console.debug('countyChanged', selectedCounty)
         if (selectedCounty) {
             resultsFilterStep = FILTER_STEPS.MUNICIPALITY
         }
@@ -60,13 +55,11 @@
             resultsFilterStep = FILTER_STEPS.COUNTY
         }
         selectedMunicipality = null;
-        updateLabel()
     }
 
     function municipalityChanged() {
-        console.log('municipalityChanged', selectedMunicipality)
+        console.debug('municipalityChanged', selectedMunicipality)
         resultsFilterStep = FILTER_STEPS.MUNICIPALITY
-        updateLabel()
     }
 
     $: console.table({

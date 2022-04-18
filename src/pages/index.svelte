@@ -6,11 +6,11 @@
   import * as JQProxy from "jquery";
   const JQ = JQProxy.default || JQProxy;
 
-  import { abbr, baseApiUrl } from "../lib/helpers/helpers.js";
+  import { baseApiUrl } from "../lib/helpers/helpers.js";
 
   import { initAll } from "@id-sk/frontend/idsk/all.js";
 
-  import Tooltip from "sv-bootstrap-tooltip";
+  // import Tooltip from "sv-bootstrap-tooltip";
   import PartiesTable from "../pages/components/PartiesTable.svelte";
   import PartiesBarChart from "./components/PartiesBarChart.svelte";
   import SlovakiaMap from "../pages/components/SlovakiaMap.svelte";
@@ -19,7 +19,7 @@
   import StatisticsTable from "../pages/components/StatisticsTable.svelte";
   import RegionalWinnersCards from "../pages/components/RegionalWinnersCards.svelte";
 
-  import { filter } from "d3";
+  // import { filter } from "d3";
 
   // types and interfaces
   import type {IConfig, ILau1, ILookup, IPartyResult} from "./types";
@@ -29,10 +29,14 @@
   let electionStatusLoading = false;
   let resultsFilterValue = null;
   let resultsFilterStep = "region";
+
+  // Handled by RegionSelector.svelte
   let selectedLocalityLabel = "";
   let selectedRegion = null;
   let selectedCounty = null;
   let selectedMunicipality = null;
+  // end
+
   let referenceEle;
   let localityResultsCounties = null;
   let localityResultsRegions = null;
@@ -89,7 +93,6 @@
       SK042: 8,
     };
 
-    // for of
     for (let loc of lau1_map) {
       lookup.lau1_to_code[loc.lau1_code] = loc;
       lookup.lau1_to_code[loc.code] = loc;
@@ -213,35 +216,38 @@
     selectedCounty,
     selectedRegion
   ) {
-    let filter_type = "";
-    let filter_value = "";
+    let filter_type;
+    let filter_value;
 
-    if (selectedMunicipality != "") {
+    if (selectedMunicipality) {
       filter_type = "municipality";
       filter_value = selectedMunicipality;
-    } else if (selectedCounty != "") {
+    } else if (selectedCounty) {
       filter_type = "county";
       filter_value = selectedCounty;
-    } else if (selectedRegion != "") {
+    } else if (selectedRegion) {
       filter_type = "region";
       filter_value = selectedRegion;
     } else {
+      filter_type = ""
+      filter_value = ""
     }
 
-    if (filter_type != "") {
+    if (filter_type !== "") {
       // Get new nesults
       console.log("=======================================");
-      getResultsByLocality(filter_type, filter_value).then((res) => {
-        console.log("res from getResultsByLocality", res);
-        // partyResults = [...res[0].parties];
-        console.log("first party doc count", res[0].parties[0].doc_count);
-        // need to update partyResults from lookup
-        let synced = fillLookupDataToFilteredResults(res[0].parties);
-        console.log("first party doc count after update", synced[0].doc_count);
-        partyResults = [...synced];
-        console.log("partyResults new", synced);
-        // syncPartyResultsAndLookup();
-      });
+      let res = await getResultsByLocality(filter_type, filter_value)
+
+      console.log("res from getResultsByLocality", res);
+      // partyResults = [...res[0].parties];
+      console.log("first party doc count", res[0].parties[0].doc_count);
+      // need to update partyResults from lookup
+      let synced = fillLookupDataToFilteredResults(res[0].parties);
+      console.log("first party doc count after update", synced[0].doc_count);
+      partyResults = [...synced];
+      console.log("partyResults new", synced);
+      // syncPartyResultsAndLookup(partyResults, lookup);
+
       electionsStatus = await getElectionsStatus(filter_type, filter_value);
     } else {
       partyResults = await fetchPartyResults();
@@ -343,7 +349,6 @@
       bind:selectedCounty={selectedCounty}
       bind:selectedMunicipality={selectedMunicipality}
       bind:selectedLocalityLabel={selectedLocalityLabel}
-      onFilterValueChange={onFilterValueChange}
     />
   {/if}
 
@@ -383,7 +388,7 @@
     </div>
   </div>
 
-  <div class="partliament-graph mb-5 {(resultsFilterStep == 'region' && selectedRegion === null) ? '' : 'd-none'}">
+  <div class="partliament-graph mb-5 {(resultsFilterStep === 'region' && selectedRegion === null) ? '' : 'd-none'}">
     <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
     <div class="row">
       <div class="col-10 mx-auto" style="min-height: 300px;">
@@ -392,11 +397,11 @@
     </div>
   </div>
 
-  {#if resultsFilterStep == "region" && selectedRegion === ""}
+  {#if resultsFilterStep === "region" && selectedRegion === ""}
     <RegionalWinnersCards {lookup} {localityResultsRegions} />
   {/if}
 
-  {#if resultsFilterStep == "region" && selectedRegion === ""}
+  {#if resultsFilterStep === "region" && selectedRegion === ""}
     <div class="country-map mb-5">
       <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
 
