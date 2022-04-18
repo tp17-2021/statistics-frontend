@@ -1,11 +1,34 @@
 <script lang="ts">
-    export let selectedRegion: string;        // kraj
-    export let selectedCounty: string;        // okres
-    export let selectedMunicipality: string;  // obec
+    import type {ICounty, IMunicipality, IRegion} from "../types";
 
-    export let REGIONS: string[];  // regions from config
-    export let COUNTRIES: string[];  // countries from config
-    export let MUNICIPALITIES: string[];  // municipalities from config
+    export let selectedRegion: number;        // kraj
+    export let selectedCounty: number;        // okres
+    export let selectedMunicipality: number;  // obec
+
+    export let selectedLocalityLabel = "";
+
+    export let REGIONS: IRegion[];  // regions from config
+    export let COUNTRIES: ICounty[];  // countries from config
+    export let MUNICIPALITIES: IMunicipality[];  // municipalities from config
+
+    // console.log("MUNICIPALITIES", MUNICIPALITIES);
+    // console.log("COUNTRIES", COUNTRIES);
+    // console.log("REGIONS", REGIONS);
+
+    function updateLabel() {
+        if (selectedMunicipality) {
+            selectedLocalityLabel = MUNICIPALITIES.find(m => m.code === selectedMunicipality)?.name;
+        }
+        else if (selectedCounty) {
+            selectedLocalityLabel = COUNTRIES.find(c => c.code === selectedCounty)?.name;
+        }
+        else if (selectedRegion) {
+            selectedLocalityLabel = REGIONS.find(r => r.code === selectedRegion)?.name;
+        }
+        else {
+            selectedLocalityLabel = "Celé Slovensko";
+        }
+    }
 
 
     const FILTER_STEPS = {
@@ -23,8 +46,9 @@
         else {
             resultsFilterStep = FILTER_STEPS.REGION
         }
-        selectedCounty = ""
-        selectedMunicipality = ""
+        selectedCounty = null
+        selectedMunicipality = null
+        updateLabel()
     }
 
     function countyChanged() {
@@ -35,12 +59,14 @@
         else {
             resultsFilterStep = FILTER_STEPS.COUNTY
         }
-        selectedMunicipality = "";
+        selectedMunicipality = null;
+        updateLabel()
     }
 
     function municipalityChanged() {
         console.log('municipalityChanged', selectedMunicipality)
         resultsFilterStep = FILTER_STEPS.MUNICIPALITY
+        updateLabel()
     }
 
     $: console.table({
@@ -63,7 +89,7 @@
                     id="region-select"
                     on:change={regionChanged}
             >
-                <option value="">Celé Slovensko</option>
+                <option value={null}>Celé Slovensko</option>
                 {#if REGIONS}
                     {#each REGIONS as region}
                         <option value={region.code}>{region.name}</option>
@@ -83,7 +109,7 @@
                     id="county-select"
                     on:change={countyChanged}
             >
-                <option value="">Celý kraj</option>
+                <option value={null}>Celý kraj</option>
                 {#if selectedRegion}
                     {#each COUNTRIES.filter((c) => c.region_code == selectedRegion) as county}
                         <option value={county.code}>{county.name}</option>
@@ -101,8 +127,9 @@
                     bind:value={selectedMunicipality}
                     class="govuk-select w-100"
                     id="numicipality-select"
+                    on:change={municipalityChanged}
             >
-                <option value="">Celý okres</option>
+                <option value={null}>Celý okres</option>
                 {#if selectedCounty}
                     {#each MUNICIPALITIES.filter((m) => m.county_code == selectedCounty) as municipality}
                         <option value={municipality.code}>{municipality.name}</option>

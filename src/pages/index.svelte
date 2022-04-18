@@ -29,10 +29,10 @@
   let electionStatusLoading = false;
   let resultsFilterValue = null;
   let resultsFilterStep = "region";
-  let selectedLocalityLabel = "Celé Slovensko";
-  let selectedRegion = "";
-  let selectedCounty = "";
-  let selectedMunicipality = "";
+  let selectedLocalityLabel = "";
+  let selectedRegion = null;
+  let selectedCounty = null;
+  let selectedMunicipality = null;
   let referenceEle;
   let localityResultsCounties = null;
   let localityResultsRegions = null;
@@ -217,19 +217,15 @@
     let filter_value = "";
 
     if (selectedMunicipality != "") {
-      selectedLocalityLabel = lookup.municipalities[selectedMunicipality].name;
       filter_type = "municipality";
       filter_value = selectedMunicipality;
     } else if (selectedCounty != "") {
-      selectedLocalityLabel = lookup.counties[selectedCounty].name;
       filter_type = "county";
       filter_value = selectedCounty;
     } else if (selectedRegion != "") {
-      selectedLocalityLabel = lookup.regions[selectedRegion].name;
       filter_type = "region";
       filter_value = selectedRegion;
     } else {
-      selectedLocalityLabel = "Celé Slovensko";
     }
 
     if (filter_type != "") {
@@ -346,6 +342,7 @@
       bind:selectedRegion={selectedRegion}
       bind:selectedCounty={selectedCounty}
       bind:selectedMunicipality={selectedMunicipality}
+      bind:selectedLocalityLabel={selectedLocalityLabel}
       onFilterValueChange={onFilterValueChange}
     />
   {/if}
@@ -386,7 +383,7 @@
     </div>
   </div>
 
-  <div class="partliament-graph mb-5 {(resultsFilterStep == 'region' && selectedRegion === '') ? '' : 'd-none'}">
+  <div class="partliament-graph mb-5 {(resultsFilterStep == 'region' && selectedRegion === null) ? '' : 'd-none'}">
     <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
     <div class="row">
       <div class="col-10 mx-auto" style="min-height: 300px;">

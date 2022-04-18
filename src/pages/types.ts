@@ -1,8 +1,3 @@
-interface ICountry {
-    code: number;
-    name: string;
-    region_code: number;
-}
 
 
 interface IKeyPair {
@@ -14,7 +9,25 @@ interface IKeyPair {
     _id: number;
 }
 
-interface IMunicipality {
+
+/**
+ * {code: 1, name: 'Bratislavský kraj'}
+ */
+export interface IRegion {
+    code: number;
+    name: string;
+}
+
+// {code: 101, name: 'Bratislava I', region_code: 1}
+export interface ICounty {
+    code: number;
+    name: string;
+    region_code: number;
+}
+
+
+// {code: 557757, name: 'Abovce', region_code: 6, county_code: 609}
+export interface IMunicipality {
     code: number;
     name: string;
     region_code: number;
@@ -34,13 +47,6 @@ interface ICandidate {
 }
 
 
-/**
- * {code: 1, name: 'Bratislavský kraj'}
- */
-class IRegion {
-    code: number;
-    name: string;
-}
 
 interface ITexts {
     elections_name_short: {
@@ -69,7 +75,7 @@ interface ITexts {
 
 // config interface
 export interface IConfig {
-    counties: ICountry[]
+    counties: ICounty[]
     key_pairs: IKeyPair[]
     municipalities: IMunicipality[];
     parties: IParty[];
@@ -91,7 +97,7 @@ export interface ILau1 {
 export interface ILookup {
     candidates: ICandidate[];
     code_to_lau1: {};
-    counties: ICountry[];
+    counties: ICounty[];
     lau1_to_code: {
         [key: string]: ILau1
     };
@@ -145,3 +151,5 @@ export interface IPartyResult extends IParty {
     relative_percentage: number;
     seats: number;
 }
+
+
