@@ -25,6 +25,7 @@
   import type {IConfig, ILau1, ILookup, IPartyResult} from "./types";
   import {fetchConfig, fetchLau1, fetchPartyResults} from "../lib/api";
 
+  let electionStatusLoading = false;
   let resultsFilterValue = null;
   let resultsFilterStep = "region";
   let selectedLocalityLabel = "Celé Slovensko";
@@ -98,7 +99,7 @@
     //         lookup.counties["217"]
     // );
 
-    console.log("lookup", lookup)
+    console.log("lookup", lookup);
 
     return lookup;
   }
@@ -244,9 +245,11 @@
         console.log("partyResults new", synced);
         // syncPartyResultsAndLookup();
       });
+      electionsStatus = await getElectionsStatus(filter_type, filter_value);
     } else {
       partyResults = await fetchPartyResults();
-      syncPartyResultsAndLookup(partyResults, lookup);
+      electionsStatus = await getElectionsStatus();
+      syncPartyResultsAndLookup();
     }
   }
 
@@ -297,8 +300,14 @@
     return results;
   }
 
-  async function getElectionsStatus() {
-    const response = await axios.get(baseApiUrl("/elastic/elections-status"));
+  async function getElectionsStatus(filter_type = null, filter_value = null) {
+    electionStatusLoading = true;
+    let queryParams = "";
+    if (filter_value) {
+      queryParams = `?filter_by=${filter_type}_code&filter_value=${filter_value}`;
+    }
+    const response = await axios.get(baseApiUrl(`/elastic/elections-status` + queryParams));
+    electionStatusLoading = false;
     return response.data.data;
   }
 
@@ -504,7 +513,7 @@
 
   <div class="elections-statistics mb-5">
     <h2 class="govuk-heading-l text-center mb-3">Všeobecné štatistiky</h2>
-    <StatisticsTable {electionsStatus} />
+    <StatisticsTable {electionsStatus} {electionStatusLoading} />
   </div>
 
   <div class="parties-table mb-5">
@@ -520,4 +529,3 @@
     />
   </div>
 </div>
-
