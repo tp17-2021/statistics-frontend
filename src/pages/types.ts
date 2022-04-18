@@ -33,17 +33,6 @@ interface ICandidate {
     _id: number;
 }
 
-interface IParty {
-    abbr: string;
-    candidates: ICandidate[];
-    color: string;
-    image: string;
-    image_bytes: string;
-    name: string;
-    official_abbr: string;
-    party_number: number;
-    _id: number;
-}
 
 /**
  * {code: 1, name: 'Bratislavský kraj'}
@@ -112,4 +101,47 @@ export interface ILookup {
     };
     parties: IParty[];
     regions: IRegion[];
+}
+
+
+
+interface IParty {
+    abbr: string;
+    candidates: ICandidate[];
+    color: string;
+    image: string;
+    image_bytes: string;
+    name: string;
+    official_abbr: string;
+    party_number: number;
+    _id: number;
+}
+
+/*
+{
+    "id": "11",
+    "doc_count": 6859,
+    "candidates": [...
+        ],
+    "percentage": 13.718,
+    "in_parliament": true,
+    "relative_percentage": 27.9891,
+    "seats": 45,
+    "_id": 11,
+    "party_number": 12,
+    "name": "Koalícia Progresívne Slovensko a SPOLU - občianska demokracia",
+    "official_abbr": "Koalícia Progresívne Slovensko a SPOLU - občianska demokracia",
+    "image": "progresivne-slovensko-a-spolu.png",
+    "color": "#015FB8",
+    "abbr": "PS SPOLU",
+    "image_bytes": "4ErkJggg...=="
+}
+ */
+export interface IPartyResult extends IParty {
+    doc_count: number;
+    id: number;
+    in_parliament: boolean;
+    percentage: number;
+    relative_percentage: number;
+    seats: number;
 }

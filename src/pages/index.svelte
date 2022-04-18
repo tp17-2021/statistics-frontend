@@ -22,7 +22,8 @@
   import { filter } from "d3";
 
   // types and interfaces
-  import type {IConfig, ILau1, ILookup} from "./types";
+  import type {IConfig, ILau1, ILookup, IPartyResult} from "./types";
+  import {fetchConfig, fetchLau1, fetchPartyResults} from "../lib/api";
 
   let resultsFilterValue = null;
   let resultsFilterStep = "region";
@@ -33,7 +34,7 @@
   let referenceEle;
   let localityResultsCounties = null;
   let localityResultsRegions = null;
-  let partyResults = [];
+  let partyResults: IPartyResult[] = [];
   let electionsStatus = [];
   let partiesInParliament = [];
   let candidates = [];
@@ -51,7 +52,7 @@
     nuts3_to_region_code: {},
   };
 
-  function createLookup(config) {
+  function createLookup(config: IConfig): ILookup {
     config.parties.forEach((party) => {
       let partyWithoutCandidates = Object.assign({}, party);
       delete partyWithoutCandidates.candidates;
@@ -86,31 +87,39 @@
       SK042: 8,
     };
 
-    console.log(
-            "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
-            lookup.counties["217"]
-    );
+    // for of
+    for (let loc of lau1_map) {
+      lookup.lau1_to_code[loc.lau1_code] = loc;
+      lookup.lau1_to_code[loc.code] = loc;
+    }
+
+    // console.log(
+    //         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
+    //         lookup.counties["217"]
+    // );
 
     console.log("lookup", lookup)
 
     return lookup;
   }
 
+
   onMount(async () => {
     document.body.className = document.body.className
       ? document.body.className + " js-enabled"
       : "js-enabled";
 
-    config = (await axios.get("api/config.json")).data;
-    lau1_map = (await axios.get("api/lau1_codes.json")).data;
-    console.log("config", config);
-    console.log("lau1_map", lau1_map);
-    lookup = createLookup(config, lau1_map);
+    config = await fetchConfig();
+    lau1_map = await fetchLau1();
+    console.debug("config", config);
+    console.debug("lau1_map", lau1_map);
+    lookup = createLookup(config);
 
-    partyResults = await getPartyResults();
-    syncPartyResultsAndLookup();
-
+    partyResults = await fetchPartyResults();
+    console.log("partyResults before sync", partyResults);
+    syncPartyResultsAndLookup(partyResults, lookup );
     console.log("partyResults on start", partyResults);
+    console.debug("lookup", lookup);
 
     // partyResults.forEach((party, index) => {
     //     party.candidates.forEach((candidate, c_index) => {
@@ -129,31 +138,23 @@
     //     lookup.parties[partyResults[index].id] = partyResults[index];
     // });
 
-    lau1_map.forEach((loc) => {
-      lookup.lau1_to_code[loc.lau1_code] = loc;
-      lookup.lau1_to_code[loc.code] = loc;
-    });
-
-    console.log("lookup", lookup);
-    console.log("partyResults", partyResults);
 
     partiesInParliament = partyResults.filter((i) => i.in_parliament);
 
-    let ttt = [];
+    candidatesInParliament = [];
     partyResults.forEach((party, index) => {
-      party.candidates.forEach((c) => {
-        if (c.in_parliament) {
-          ttt.push(c);
+      party.candidates.forEach((candidate) => {
+        if (candidate.in_parliament) {
+          candidatesInParliament = [...candidatesInParliament, candidate];
         }
-        candidates.push(c);
+        candidates = [...candidates, candidate];
+        candidates.push(candidate);
       });
     });
-    candidates = [...candidates];
-    candidatesInParliament = [...ttt];
 
-    console.log("partiesInParliament", partiesInParliament);
-    console.log("candidates", candidates);
-    console.log("candidatesInParliament", candidatesInParliament);
+    console.debug("partiesInParliament", partiesInParliament);
+    console.debug("candidates", candidates);
+    console.debug("candidatesInParliament", candidatesInParliament);
 
     electionsStatus = await getElectionsStatus();
 
@@ -177,27 +178,33 @@
     localityResultsRegions = tmp;
     console.log("localityResultsRegions", localityResultsRegions);
 
-    // fix routify error by implementing tab switching logic by ourselves
+    fixIDSKtabs()
+
+    initAll({});
+  });
+
+
+  /**
+   * workaround to fix routify incompatibility with IDSK tabs by implementing tab switching logic by ourselves
+   */
+  function fixIDSKtabs() {
     JQ(".govuk-tabs__tab").click(function () {
       let hash = JQ(this).data("href");
       JQ(hash).show();
-      // window.s = JQ(hash)
       JQ(hash)
-        .parent()
-        .find(".govuk-tabs__panel:not(" + hash + ")")
-        .hide();
+              .parent()
+              .find(".govuk-tabs__panel:not(" + hash + ")")
+              .hide();
       JQ(hash)
-        .parent()
-        .parent()
-        .find(".govuk-tabs__list-item--selected")
-        .removeClass("govuk-tabs__list-item--selected");
+              .parent()
+              .parent()
+              .find(".govuk-tabs__list-item--selected")
+              .removeClass("govuk-tabs__list-item--selected");
       JQ('[data-href="' + hash + '"]')
-        .parent()
-        .addClass("govuk-tabs__list-item--selected");
+              .parent()
+              .addClass("govuk-tabs__list-item--selected");
     });
-
-    initAll();
-  });
+  }
 
   async function onFilterValueChange(
     selectedMunicipality,
@@ -238,16 +245,19 @@
         // syncPartyResultsAndLookup();
       });
     } else {
-      partyResults = await getPartyResults();
-      syncPartyResultsAndLookup();
+      partyResults = await fetchPartyResults();
+      syncPartyResultsAndLookup(partyResults, lookup);
     }
   }
 
   $: onFilterValueChange(selectedMunicipality, selectedCounty, selectedRegion);
 
-  // On init sync info inside results and lookup for whole data
-  function syncPartyResultsAndLookup() {
-    console.log("syncPartyResultsAndLookup");
+  /**
+   * On init sync info inside results and lookup for whole data
+   */
+  function syncPartyResultsAndLookup(partyResults: IPartyResult[], lookup: ILookup) {
+    console.debug("syncPartyResultsAndLookup");
+
     partyResults.forEach((party, index) => {
       party.candidates.forEach((candidate, c_index) => {
         // Add whole object to results retrieved from elastic
@@ -266,7 +276,9 @@
     });
   }
 
-  // complete the newly fetched locality results by data from config
+  /**
+   * complete the newly fetched locality results by data from config
+   */
   function fillLookupDataToFilteredResults(results) {
     results.forEach((party, index) => {
       party.candidates.forEach((candidate, c_index) => {
@@ -290,30 +302,7 @@
     return response.data.data;
   }
 
-  async function getPartyResults() {
-    const response = await axios
-      .post(baseApiUrl("/elastic/get-party-candidate-results"), {})
-      .catch(function (error) {
-        if (error.response) {
-          // Request made and server responded
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log("Error", error.message);
-        }
-      });
 
-    if (response.data) {
-      return response.data;
-    } else {
-      return [];
-    }
-  }
 
   async function getResultsByLocality(
     localityType = "region",
