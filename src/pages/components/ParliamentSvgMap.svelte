@@ -1,4 +1,6 @@
 <script>
+  import LoadingOverlay from "./LoadingOverlay.svelte";
+
   export let partiesInParliament;
   export let lookup;
   import {onDestroy, onMount} from "svelte";
@@ -10,6 +12,7 @@
   import _ from "lodash";
 
   let parliamentMapWrapperWidth;
+  let loaded = false;
 
   onDestroy(() => {
     JQ(parliamentMap).empty();
@@ -24,6 +27,7 @@
   // $: console.log("parliamentMapWrapperWidth", parliamentMapWrapperWidth);
 
   function setUpParliamentDiagramResults(partiesInParliament) {
+    loaded = false;
     JQ(parliamentMap).empty();
     if (!partiesInParliament.length) {
       return;
@@ -99,6 +103,7 @@
       dots_total += dot_cnt;
     });
     calcCircleOrderAndLabels();
+    loaded = true;
   }
 
   function Arc(r) {
@@ -234,6 +239,9 @@
 </script>
 
 <div id="parliament-map-wrapper" bind:this={parliamentMapWrapper} bind:clientWidth={parliamentMapWrapperWidth}>
+  {#if !loaded}
+    <LoadingOverlay />
+  {/if}
   <div id="parliament-map" bind:this={parliamentMap}></div>
 </div>
 

@@ -1,9 +1,15 @@
 <script>
+    import LoadingOverlay from "./LoadingOverlay.svelte";
+
     export let partyResults;
 </script>
 
-<div class="parties-table table-overflow-wrapper">
+<div class="parties-table table-overflow-wrapper position-relative">
+    {#if partyResults.length === 0}
+        <LoadingOverlay />
+    {/if}
     <table class="govuk-table">
+
         <thead class="govuk-table__head">
             <tr class="govuk-table__row">
                 <th scope="col" class="govuk-table__header">#</th>
@@ -38,6 +44,7 @@
     .govuk-table {
         margin-bottom: 1rem;
         width: 100%;
+      min-height: 300px;
         @import "node_modules/@id-sk/frontend/govuk/components/table/_table";
     }
     .party-color-dot {

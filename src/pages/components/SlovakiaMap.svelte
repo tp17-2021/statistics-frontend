@@ -22,6 +22,7 @@
     import Chart from "chart.js/auto";
     import axios from "axios";
     import * as JQProxy from "jquery";
+    import LoadingOverlay from "./LoadingOverlay.svelte";
     const JQ = (JQProxy).default || JQProxy;
 
     // import * as d3 from "d3";
@@ -201,6 +202,9 @@
 </svelte:head>
 
 <div class="map-container-wrapper" bind:clientWidth={mapContainerWidth}>
+    {#if !isLoadedD3 || !localityResults || !lookup || !partiesInParliament || !mapContainerWidth}
+        <LoadingOverlay />
+    {/if}
     <div id="map-container-{uniqueID}" class="map-container" ></div>
 </div>
 
@@ -251,5 +255,6 @@
 
     .map-container-wrapper {
       width: 100%;
+      min-height: 300px;
     }
 </style>

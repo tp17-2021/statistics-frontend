@@ -152,4 +152,10 @@ export interface IPartyResult extends IParty {
     seats: number;
 }
 
-
+// {"registered_voters":4432419,"total_votes":50000,"participation":1.13,"number_of_polling_places":5998}
+export interface IElectionStatus {
+    registered_voters: number;
+    total_votes: number;
+    participation: number;
+    number_of_polling_places: number;
+}

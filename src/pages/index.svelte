@@ -22,9 +22,10 @@
   // import { filter } from "d3";
 
   // types and interfaces
-  import type {IConfig, ILau1, ILookup, IPartyResult} from "./types";
-  import {fetchConfig, fetchLau1, fetchPartyResults} from "../lib/api";
+  import type {IConfig, IElectionStatus, ILau1, ILookup, IPartyResult} from "./types";
+  import {fetchConfig, fetchElectionStatus, fetchLau1, fetchPartyResults} from "../lib/api";
   import RegionSelector from "./components/RegionSelector.svelte";
+  import LoadingOverlay from "./components/LoadingOverlay.svelte";
 
   let electionStatusLoading = false;
   let resultsFilterValue = null;
@@ -41,7 +42,7 @@
   let localityResultsCounties = null;
   let localityResultsRegions = null;
   let partyResults: IPartyResult[] = [];
-  let electionsStatus = [];
+  let electionsStatus: IElectionStatus = null;
   let partiesInParliament = [];
   let candidates = [];
   let candidatesInParliament = [];
@@ -121,6 +122,7 @@
     console.debug("lau1_map", lau1_map);
     lookup = createLookup(config);
 
+    partyResults = []
     partyResults = await fetchPartyResults();
     console.log("partyResults before sync", partyResults);
     syncPartyResultsAndLookup(partyResults, lookup );
@@ -162,8 +164,8 @@
     console.debug("candidates", candidates);
     console.debug("candidatesInParliament", candidatesInParliament);
 
-    electionsStatus = await getElectionsStatus();
-
+    electionsStatus = null   // show loading spinner
+    electionsStatus = await fetchElectionStatus();
     // console.log("electionsStatus", electionsStatus);
 
     // console.log("Loaded");
@@ -241,6 +243,7 @@
     if (filter_type !== "") {
       // Get new nesults
       console.log("=======================================");
+      partyResults = []
       let res = await getResultsByLocality(filter_type, filter_value)
 
       console.log("res from getResultsByLocality", res);
@@ -253,10 +256,13 @@
       console.log("partyResults new", synced);
       // syncPartyResultsAndLookup(partyResults, lookup);
 
-      electionsStatus = await getElectionsStatus(filter_type, filter_value);
+      electionsStatus = null  // show loading spinner
+      electionsStatus = await fetchElectionStatus(filter_type, filter_value);
     } else {
+      partyResults = []
       partyResults = await fetchPartyResults();
-      electionsStatus = await getElectionsStatus();
+      electionsStatus = null  // show loading spinner
+      electionsStatus = await fetchElectionStatus();
       syncPartyResultsAndLookup(partyResults, lookup);
     }
   }
@@ -307,18 +313,6 @@
     });
     return results;
   }
-
-  async function getElectionsStatus(filter_type = null, filter_value = null) {
-    electionStatusLoading = true;
-    let queryParams = "";
-    if (filter_value) {
-      queryParams = `?filter_by=${filter_type}_code&filter_value=${filter_value}`;
-    }
-    const response = await axios.get(baseApiUrl(`/elastic/elections-status` + queryParams));
-    electionStatusLoading = false;
-    return response.data.data;
-  }
-
 
 
   async function getResultsByLocality(
@@ -381,6 +375,9 @@
       </ul>
       <div class="govuk-tabs__panel" id="parties-tab-1" >
         <h2 class="govuk-heading-m">Strany nad 5%</h2>
+        {#if partyResults.length === 0}
+          <LoadingOverlay />
+        {/if}
         <PartiesBarChart {partyResults} {barChartWidth} chartType={"elected"}  />
       </div>
       <div
@@ -388,6 +385,9 @@
         id="parties-tab-2"
       >
         <h2 class="govuk-heading-m">Všetky strany</h2>
+        {#if partyResults.length === 0}
+          <LoadingOverlay />
+        {/if}
         <PartiesBarChart {partyResults} {barChartWidth} chartType={"all"} />
       </div>
     </div>
@@ -462,7 +462,7 @@
 
   <div class="elections-statistics mb-5">
     <h2 class="govuk-heading-l text-center mb-3">Všeobecné štatistiky</h2>
-    <StatisticsTable {electionsStatus} {electionStatusLoading} />
+    <StatisticsTable {electionsStatus} />
   </div>
 
   <div class="parties-table mb-5">

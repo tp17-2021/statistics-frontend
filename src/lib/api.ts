@@ -1,6 +1,6 @@
 import axios from "axios";
 import {baseApiUrl} from "./helpers/helpers";
-import type {IConfig, ILau1, IPartyResult} from "../pages/types";
+import type {IConfig, IElectionStatus, ILau1, IPartyResult} from "../pages/types";
 
 /**
  * Fetches config from server
@@ -36,4 +36,20 @@ export async function fetchPartyResults(): Promise<IPartyResult[]> {
 
     // @ts-ignore
     return response?.data || [];
+}
+
+
+export async function fetchElectionStatus(filter_type: string = null, filter_value: string = null): Promise<IElectionStatus> {
+    let queryParams = {};
+    if (filter_value) {
+        queryParams = {
+            filter_by: filter_type + "_code",
+            filter_value: filter_value,
+        }
+    }
+    const response = await axios.get(baseApiUrl(`/elastic/elections-status`), {
+        params: queryParams,
+    });
+
+    return response.data.data;
 }
