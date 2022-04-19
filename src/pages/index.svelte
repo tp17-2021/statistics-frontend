@@ -183,9 +183,8 @@
     localityResultsRegions = tmp;
     console.log("localityResultsRegions", localityResultsRegions);
 
-    fixIDSKtabs()
-
     initAll({});
+    fixIDSKtabs()
   });
 
 
@@ -193,8 +192,8 @@
    * workaround to fix routify incompatibility with IDSK tabs by implementing tab switching logic by ourselves
    */
   function fixIDSKtabs() {
-    JQ(".govuk-tabs__tab").click(function () {
-      let hash = JQ(this).data("href");
+    function changeTab(tab) {
+      let hash = JQ(tab).data("href");
       JQ(hash).show();
       JQ(hash)
               .parent()
@@ -208,7 +207,12 @@
       JQ('[data-href="' + hash + '"]')
               .parent()
               .addClass("govuk-tabs__list-item--selected");
+    }
+    JQ(".govuk-tabs__tab").click(function () {
+      changeTab(this)
     });
+
+    JQ(".govuk-tabs__panel--hidden").hide();
   }
 
   async function onFilterValueChange(
