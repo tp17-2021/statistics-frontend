@@ -2,11 +2,13 @@
     export let data;
     export let lookup;
 
-    import { abbr, getCandidateFullName } from "../../lib/helpers/helpers.js";
-    import { searchAndPaginate } from "../../lib/components/pagination/paginate";
+    import {abbr, getCandidateFullName} from "../../lib/helpers/helpers.js";
+    import {searchAndPaginate} from "../../lib/components/pagination/paginate";
     import PaginationLinks from "../../lib/components/pagination/PaginationLinks.svelte";
-    import type { IpaginationObject } from "../../lib/components/pagination/paginate";
+    import type {IpaginationObject} from "../../lib/components/pagination/paginate";
     import SvelteTooltip from 'svelte-tooltip';
+
+    let onlyInParliament
 
     // // --- pagination and search ---
     let paginationObject: IpaginationObject = {
@@ -19,18 +21,31 @@
         searchBy: ["first_name", "last_name"],
     };
 
-    function paginateCandidates() {
+    function paginateCandidates(_ = null) {
+        if (!data) return;
+
+        if (onlyInParliament) {
+            paginationObject.items = data.filter((candidate) => candidate.in_parliament);
+        } else {
+            paginationObject.items = data;
+        }
+        paginationObject.paginatedItems = []
+        console.log("paginationObject.items", paginationObject.items);
+        console.log("paginationObject.items onlyInParliament", onlyInParliament);
         searchAndPaginate(paginationObject); // paginationObject is updated inside this function
         paginatedCandidates = [...paginationObject.paginatedItems];
     }
 
     let paginatedCandidates = [];
 
-    $: {
-        let candidates = data;
-        paginationObject.items = candidates;
-        paginateCandidates();
+    function checkBoxChanged(onlyInParliament) {
+        paginationObject.currentPageNumber = 1;
+        paginateCandidates()
     }
+
+    $: checkBoxChanged(onlyInParliament);
+
+    $: paginateCandidates(data);
 
     // $: console.log("CPT data", data);
     // $: console.log("CPT paginatedCandidates", paginatedCandidates);
@@ -47,10 +62,10 @@
         <div class="col-12 col-md-8 mx-auto">
             <div class="govuk-form-group">
                 <input
-                    class="govuk-input"
-                    type="text"
-                    placeholder="Hľadať podľa mena"
-                    on:input={(e) => {
+                        class="govuk-input"
+                        type="text"
+                        placeholder="Hľadať podľa mena"
+                        on:input={(e) => {
                         console.log("hladam:", e.target.value);
                         paginationObject.currentPageNumber = 1;
                         paginationObject.searchTerm = e.target.value;
@@ -61,83 +76,103 @@
         </div>
     </div>
 
+    <div class="govuk-form-group">
+        <div class="govuk-checkboxes govuk-checkboxes--small">
+            <div class="govuk-checkboxes__item">
+                <input class="govuk-checkboxes__input" id="onlyInParliament" type="checkbox"
+                       bind:checked={onlyInParliament}>
+                <label class="govuk-label govuk-checkboxes__label" for="onlyInParliament">
+                    Zobraziť iba kandidátov, ktorí sú v parlamente
+                </label>
+            </div>
+        </div>
+    </div>
+    <!--    <label>-->
+    <!--        <input type=checkbox bind:checked={onlyInParliament}>-->
+    <!--        Zobraziť iba kandidátov, ktorí sú v parlamente-->
+    <!--    </label>-->
+
     <div class="table-overflow-wrapper">
-    <table class="govuk-table mb-3">
-        <colgroup>
-            <col style="width:30%" />
-            <col style="width:20%" />
-            <col style="width:10%" />
-            <col style="width:15%" />
-            <col style="width:15%" />
-        </colgroup>
-        <thead class="govuk-table__head">
+        <table class="govuk-table mb-3">
+            <colgroup>
+                <col style="width:30%"/>
+                <col style="width:20%"/>
+                <col style="width:10%"/>
+                <col style="width:15%"/>
+                <col style="width:15%"/>
+            </colgroup>
+            <thead class="govuk-table__head">
             <tr class="govuk-table__row">
                 <th scope="col" class="govuk-table__header">Meno</th>
                 <th scope="col" class="govuk-table__header">Strana</th>
                 <th scope="col" class="govuk-table__header">V&nbsp;parlamente</th>
                 <th
-                    scope="col"
-                    class="govuk-table__header govuk-table__header--numeric"
-                    >Hlasov</th
+                        scope="col"
+                        class="govuk-table__header govuk-table__header--numeric"
+                >Hlasov
+                </th
                 >
                 <th
-                    scope="col"
-                    class="govuk-table__header govuk-table__header--numeric"
-                    >Percent</th
+                        scope="col"
+                        class="govuk-table__header govuk-table__header--numeric"
+                >Percent
+                </th
                 >
             </tr>
-        </thead>
-        <tbody class="govuk-table__body">
+            </thead>
+            <tbody class="govuk-table__body">
             <!-- {#each partiesInParliament as party} -->
             {#each paginatedCandidates as candidate}
                 <tr class="govuk-table__row">
                     <td class="govuk-table__cell"
-                        >{getCandidateFullName(candidate)}</td
+                    >{getCandidateFullName(candidate)}</td
                     >
-                    <td class="govuk-table__cell" data-bs-toggle="tooltip" data-bs-placement="top" title="Tooltip on top"
-                        >
-                        <SvelteTooltip tip={lookup.parties[candidate.party_number - 1].name} top color="#FFFFFF" >
+                    <td class="govuk-table__cell" data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Tooltip on top"
+                    >
+                        <SvelteTooltip tip={lookup.parties[candidate.party_number - 1].name} top color="#FFFFFF">
                             {lookup.parties[candidate.party_number - 1].abbr}
                         </SvelteTooltip>
-                        </td
+                    </td
                     >
                     <td class="govuk-table__cell text-center">
                         {#if candidate.in_parliament}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            fill="currentColor"
-                            class="bi bi-check2-circle"
-                            viewBox="0 0 16 16"
-                            style="fill: green; width: 1.375rem; height: 1.375rem;"
-                        >
-                            <path
-                                d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z"
-                            />
-                            <path
-                                d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z"
-                            />
-                        </svg>
+                            <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    fill="currentColor"
+                                    class="bi bi-check2-circle"
+                                    viewBox="0 0 16 16"
+                                    style="fill: green; width: 1.375rem; height: 1.375rem;"
+                            >
+                                <path
+                                        d="M2.5 8a5.5 5.5 0 0 1 8.25-4.764.5.5 0 0 0 .5-.866A6.5 6.5 0 1 0 14.5 8a.5.5 0 0 0-1 0 5.5 5.5 0 1 1-11 0z"
+                                />
+                                <path
+                                        d="M15.354 3.354a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l7-7z"
+                                />
+                            </svg>
                         {/if}
                     </td>
                     <td class="govuk-table__cell govuk-table__cell--numeric"
-                        >{candidate.doc_count}</td
+                    >{candidate.doc_count}</td
                     >
                     <td class="govuk-table__cell govuk-table__cell--numeric"
-                        >{Math.round(candidate.percentage * 100) / 100} %</td
+                    >{Math.round(candidate.percentage * 100) / 100} %
+                    </td
                     >
                 </tr>
             {/each}
 
             <!-- {/each} -->
-        </tbody>
-    </table>
+            </tbody>
+        </table>
     </div>
 
     {#if paginatedCandidates.length == 0}
         <div
-            class="no-results-container d-flex justify-content-center align-items-center"
+                class="no-results-container d-flex justify-content-center align-items-center"
         >
             <h3 class="text-center text-muted">Nevyhovuje žiaden kandidát</h3>
         </div>
@@ -145,20 +180,20 @@
 
     <div class="mb3">
         <PaginationLinks
-            {paginationObject}
-            paginationObjectChanged={paginateCandidates}
+                {paginationObject}
+                paginationObjectChanged={paginateCandidates}
         />
     </div>
 </div>
 
 <style type="text/scss">
-    .govuk-table {
-        margin-bottom: 1rem;
-        width: 100%;
-        @import "node_modules/@id-sk/frontend/govuk/components/table/_table";
-    }
+  .govuk-table {
+    margin-bottom: 1rem;
+    width: 100%;
+    @import "node_modules/@id-sk/frontend/govuk/components/table/_table";
+  }
 
-    .no-results-container {
-        min-height: 200px;
-    }
+  .no-results-container {
+    min-height: 200px;
+  }
 </style>
