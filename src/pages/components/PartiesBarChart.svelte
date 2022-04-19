@@ -1,61 +1,79 @@
 <script>
-    import Chart from "chart.js/auto";
-    import { abbr } from "../../lib/helpers/helpers.js";
+  import Chart from "chart.js/auto";
+  import { abbr } from "../../lib/helpers/helpers.js";
 
-    export let partyResults;
-    export let chartType = 'elected';
-    let chartElement = null;
-    let partiesChart = null;
+  export let partyResults;
+  export let chartType = "elected";
+  export let barChartWidth;
+  let chartElement = null;
+  let partiesChart = null;
 
-    $: watchForResultsChange = renderPartyBarChart(
-        partyResults
-    );
+  $: renderPartyBarChart(partyResults, barChartWidth);
 
-    function renderPartyBarChart(data) {
+  function renderPartyBarChart(data, width) {
+    console.log("Rendering party bar chart innerWidth", window.innerWidth);
+    console.log(width);
+    if (!data.length) {
+      return;
+    }
 
-        if (!data.length) {
-            return;
-        }
+    if (chartType === "elected") {
+      data = data.filter((d) => d.percentage > 5);
+    }
 
-        if(chartType === 'elected') {
-            data = data.filter(d => d.percentage > 5);
-        }
+    var ctx = chartElement.getContext("2d");
+    console.log("partiesChart: ", partiesChart);
+    console.log("data: ", data);
 
-        var ctx = chartElement.getContext("2d");
-        console.log("partiesChart: ", partiesChart);
-        console.log("data: ", data);
-        if (partiesChart) { partiesChart.destroy(); }
-        partiesChart = new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: data.map((p) => p.abbr),
-                datasets: [
-                    {
-                        label: "Percent",
-                        backgroundColor: data.map((party) => {
-                            return (party.percentage > 5) ? party.color : '#ccc';
-                        }),
-                        data: data.map((party) => party.percentage),
-                    },
-                ],
+    // TODO fix problem with different height on mobile while beeing inverted
+    // if (window.innerWidth < 767.99 && chartType === "all") {
+    //     chartElement.height = 500;
+    // } else {
+    //     chartElement.height = "50vh";
+    // }
+
+    if (partiesChart) {
+      partiesChart.destroy();
+    }
+    partiesChart = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: data.map((p) => p.abbr),
+        datasets: [
+          {
+            label: "Percent",
+            backgroundColor: data.map((party) => {
+              return party.percentage > 5 ? party.color : "#ccc";
+            }),
+            data: data.map((party) => party.percentage),
+          },
+        ],
+      },
+      options: {
+        // categoryPercentage: window.innerWidth > 756 ? 0.9 : 0.5, // here
+        // barPercentage: window.innerWidth > 756 ? 0.9 : 0.9, // here
+        indexAxis: window.innerWidth > 768 ? "x" : "y",
+        // maintainAspectRatio: false,
+        scales: {
+          x: {
+            ticks: { autoSkip: false, stepSize: 3, max: 5, min: 2 },
+            grid: {
+              display: false,
             },
-            options: {
-                scales: {
-                    x: {
-                        grid: {
-                            display: false,
-                        },
-                    },
-                },
-                plugins: {
-                    legend: {
-                        display: false,
-                    },
-                    tooltip: {
-                        // Disable the on-canvas tooltip
-                        enabled: true,
+          },
+          y: {
+            ticks: { autoSkip: false },
+          },
+        },
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            // Disable the on-canvas tooltip
+            enabled: true,
 
-                        /*external: function (context) {
+            /*external: function (context) {
                             // Tooltip Element
                             let tooltipEl =
                                 document.getElementById("chartjs-tooltip");
@@ -161,11 +179,11 @@
                                 "px";
                             tooltipEl.style.pointerEvents = "none";
                         },*/
-                    },
-                },
-            },
-        });
-    }
+          },
+        },
+      },
+    });
+  }
 </script>
 
-<canvas bind:this={chartElement}/>
+<canvas bind:this={chartElement} />

@@ -45,6 +45,7 @@
   let partiesInParliament = [];
   let candidates = [];
   let candidatesInParliament = [];
+  let barChartWidth = null;
   let config: IConfig = null;
   let lau1_map: ILau1 = null;
   let lookup: ILookup = {
@@ -356,7 +357,7 @@
     />
   {/if}
 
-  <div class="parties-graph mb-5">
+  <section class="parties-graph mb-5" bind:clientWidth={barChartWidth}>
     <div class="govuk-tabs">
       <ul class="govuk-tabs__list">
         <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
@@ -378,19 +379,19 @@
           </a>
         </li>
       </ul>
-      <section class="govuk-tabs__panel" id="parties-tab-1">
+      <div class="govuk-tabs__panel" id="parties-tab-1" >
         <h2 class="govuk-heading-m">Strany nad 5%</h2>
-        <PartiesBarChart {partyResults} chartType={"elected"} />
-      </section>
-      <section
+        <PartiesBarChart {partyResults} {barChartWidth} chartType={"elected"}  />
+      </div>
+      <div
         class="govuk-tabs__panel govuk-tabs__panel--hidden"
         id="parties-tab-2"
       >
         <h2 class="govuk-heading-m">Všetky strany</h2>
-        <PartiesBarChart {partyResults} chartType={"all"} />
-      </section>
+        <PartiesBarChart {partyResults} {barChartWidth} chartType={"all"} />
+      </div>
     </div>
-  </div>
+  </section>
 
   <!--{#if resultsFilterStep === 'region' && selectedRegion === null}-->
   <div class="partliament-graph mb-5 {(resultsFilterStep === 'region' && selectedRegion === null) ? '' : 'd-none'}">
