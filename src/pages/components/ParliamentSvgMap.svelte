@@ -208,14 +208,10 @@
 
           console.log("tooltip offsets", jq_tooltip.height());
           // let top = elem.position().top - (jq_tooltip.height() + 32) + "px"
-          var parentPos = parliamentMapWrapper.getBoundingClientRect()
-          var childPos = e.target.getBoundingClientRect();
+          let parentPos = parliamentMapWrapper.getBoundingClientRect()
+          let childPos = e.target.getBoundingClientRect();
           let left = childPos.left  - parentPos.left - 12 + "px";
           let top = childPos.top - parentPos.top - (jq_tooltip.height() + 32) + "px";
-          // console.log(rect.top, rect.right, rect.bottom, rect.left);
-          // let top = elem.position().top + "px"
-          // let left = elem.position().left - 12 + "px"
-
 
           tooltip
             .style("top", top)

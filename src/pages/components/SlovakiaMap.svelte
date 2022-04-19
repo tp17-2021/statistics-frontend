@@ -161,9 +161,14 @@
 
                         tooltipResults.html(text);
 
+                        let parentPos = elem.parent().parent().parent()[0].getBoundingClientRect()
+                        let childPos = elem[0].getBoundingClientRect();
+                        let left = childPos.left  - parentPos.left - 48 + "px";
+                        let top = childPos.top - parentPos.top + 64 + "px";  // + (jq_tooltip.height() )
+
                         tooltip
-                        .style("top", elem.position().top - (jq_tooltip.height() + 16 ) + "px")
-                        .style("left", elem.position().left - 12 + "px");
+                        .style("top", top)
+                        .style("left", left);
 
                         return tooltip.style("visibility", "visible");
                     }
