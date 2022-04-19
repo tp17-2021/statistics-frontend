@@ -6,7 +6,7 @@
     <table class="govuk-table">
         <thead class="govuk-table__head">
             <tr class="govuk-table__row">
-                <th scope="col" class="govuk-table__header">Poradie</th>
+                <th scope="col" class="govuk-table__header">#</th>
                 <th scope="col" class="govuk-table__header">Názov</th>
                 <th scope="col" class="govuk-table__header govuk-table__header--numeric">Hlasov</th>
                 <th scope="col" class="govuk-table__header govuk-table__header--numeric">Percent</th>
@@ -26,7 +26,7 @@
                         </div>
                     </td>
                     <td class="govuk-table__cell govuk-table__cell--numeric">{party.doc_count}</td>
-                    <td class="govuk-table__cell govuk-table__cell--numeric">{party.percentage}</td>
+                    <td class="govuk-table__cell govuk-table__cell--numeric">{Math.round(party.percentage * 100) / 100} %</td>
                     <td class="govuk-table__cell govuk-table__cell--numeric">{party.seats ?? '-'}</td>
                 </tr>
             {/each}

@@ -399,11 +399,11 @@
   </div>
   <!--{/if}-->
 
-  {#if resultsFilterStep === "region" && selectedRegion === ""}
+  {#if resultsFilterStep === "region" && selectedRegion === null}
     <RegionalWinnersCards {lookup} {localityResultsRegions} />
   {/if}
 
-  {#if resultsFilterStep === "region" && selectedRegion === ""}
+  {#if resultsFilterStep === "region" && selectedRegion === null}
     <div class="country-map mb-5">
       <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
 

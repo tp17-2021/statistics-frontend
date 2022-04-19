@@ -71,3 +71,6 @@ button:focus {
 	max-width: 100%;
 }
 
+.govuk-table__cell {
+	vertical-align: middle !important;
+}

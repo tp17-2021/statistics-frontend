@@ -162,8 +162,8 @@
                         tooltipResults.html(text);
 
                         tooltip
-                        .style("top", elem.offset().top - (jq_tooltip.height() + 16 ) + "px")
-                        .style("left", elem.offset().left - 12 + "px");
+                        .style("top", elem.position().top - (jq_tooltip.height() + 16 ) + "px")
+                        .style("left", elem.position().left - 12 + "px");
 
                         return tooltip.style("visibility", "visible");
                     }
@@ -192,7 +192,7 @@
 </svelte:head>
 
 
-<div id="map-container-{uniqueID}" class="map-div"/>
+<div id="map-container-{uniqueID}" class="map-container"/>
 
 
 <style type="text/scss">
@@ -232,5 +232,9 @@
         &:hover {
             fill-opacity: 1 !important;
         }
+    }
+
+    :global(.map-container)  {
+        position: relative;
     }
 </style>

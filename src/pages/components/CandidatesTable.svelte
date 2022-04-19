@@ -125,7 +125,7 @@
                         >{candidate.doc_count}</td
                     >
                     <td class="govuk-table__cell govuk-table__cell--numeric"
-                        >{candidate.percentage}</td
+                        >{Math.round(candidate.percentage * 100) / 100} %</td
                     >
                 </tr>
             {/each}

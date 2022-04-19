@@ -7,13 +7,19 @@
   import * as d3 from "d3";
   import { abbr, getCandidateFullName } from "../../lib/helpers/helpers.js";
 
+  import _ from "lodash";
+
   let parliamentMapWrapperWidth;
 
   onDestroy(() => {
     JQ(parliamentMap).empty();
   });
 
-  $: setUpParliamentDiagramResults(partiesInParliament, parliamentMapWrapperWidth);
+  const debounce_setUpParliamentDiagramResults = _.debounce(() => {
+    setUpParliamentDiagramResults(partiesInParliament, parliamentMapWrapperWidth)
+  }, 500);
+
+  $: debounce_setUpParliamentDiagramResults(partiesInParliament, parliamentMapWrapperWidth);
 
   // $: console.log("parliamentMapWrapperWidth", parliamentMapWrapperWidth);
 
@@ -201,10 +207,19 @@
           tooltipPercent.text("Percent: " + member.percentage);
 
           console.log("tooltip offsets", jq_tooltip.height());
+          // let top = elem.position().top - (jq_tooltip.height() + 32) + "px"
+          var parentPos = parliamentMapWrapper.getBoundingClientRect()
+          var childPos = e.target.getBoundingClientRect();
+          let left = childPos.left  - parentPos.left - 12 + "px";
+          let top = childPos.top - parentPos.top - (jq_tooltip.height() + 32) + "px";
+          // console.log(rect.top, rect.right, rect.bottom, rect.left);
+          // let top = elem.position().top + "px"
+          // let left = elem.position().left - 12 + "px"
+
 
           tooltip
-            .style("top", elem.offset().top - (jq_tooltip.height() + 32) + "px")
-            .style("left", elem.offset().left - 12 + "px");
+            .style("top", top)
+            .style("left", left);
 
           return tooltip.style("visibility", "visible");
         }
@@ -267,6 +282,13 @@
     :global(.percent) {
       font-size: 1.125rem;
     }
+  }
+  :global(circle):hover {
+    filter: brightness(0.5);
+  }
+
+  #parliament-map-wrapper {
+    position: relative;
   }
 
   #parliament-map-legend {
