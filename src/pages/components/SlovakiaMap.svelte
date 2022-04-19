@@ -27,17 +27,19 @@
     // import * as d3 from "d3";
     // import {geoPath} from 'd3-geo';
 
-    $: { plotSlovakiaMap(isLoadedD3, localityResults, lookup, partiesInParliament); }
+    $: plotSlovakiaMap(isLoadedD3, localityResults, lookup, partiesInParliament, mapContainerWidth);
 
     onMount(async () => {
 
     });
 
-    async function plotSlovakiaMap(isLoadedD3, localityResults, lookup, partiesInParliament) {
-
-        if(!isLoadedD3 || !localityResults || !lookup || !partiesInParliament) {
+    async function plotSlovakiaMap(isLoadedD3, localityResults, lookup, partiesInParliament, mapContainerWidth) {
+        if(!isLoadedD3 || !localityResults || !lookup || !partiesInParliament || !mapContainerWidth) {
+            console.log("mapContainerWidth ignored", mapContainerWidth);
             return;
         }
+        console.log("mapContainerWidth", mapContainerWidth);
+
 
         JQ("#map-container-"+uniqueID).html("");
 
@@ -50,7 +52,7 @@
 
         // let formatNumber = d3.format("..0f");
         let projection = d3.geo.mercator()
-        .scale(8000) // TODO toto pri mobile robi problem
+        .scale(mapContainerWidth * 10) // TODO toto pri mobile robi problem
         .center([19.68007426682414, 48.63670023564952]) //projection center
         .translate([width / 2, height / 2]) //translate to center the map in view
 
@@ -184,6 +186,8 @@
             .selectAll("path.okres")
             .style("stroke-width", 1.0 / zoom.scale() + "px");
         }
+
+    let mapContainerWidth;
     </script>
 
     <svelte:head>
@@ -196,8 +200,9 @@
     <script src="//d3js.org/topojson.v1.min.js"></script>
 </svelte:head>
 
-
-<div id="map-container-{uniqueID}" class="map-container"/>
+<div class="map-container-wrapper" bind:clientWidth={mapContainerWidth}>
+    <div id="map-container-{uniqueID}" class="map-container" ></div>
+</div>
 
 
 <style type="text/scss">
@@ -212,6 +217,7 @@
         padding: 16px;
         z-index: 10;
         width: 320px;
+        pointer-events:none;
 
         :global(.party-name){
             width: 10rem;
@@ -239,7 +245,11 @@
         }
     }
 
-    :global(.map-container)  {
-        position: relative;
+    .map-container {
+      position: relative;
+    }
+
+    .map-container-wrapper {
+      width: 100%;
     }
 </style>
