@@ -19,13 +19,30 @@
   import StatisticsTable from "../pages/components/StatisticsTable.svelte";
   import RegionalWinnersCards from "../pages/components/RegionalWinnersCards.svelte";
 
+  import Modal from "../lib/components/Modal.svelte";
+
   // import { filter } from "d3";
 
   // types and interfaces
-  import type {IConfig, IElectionStatus, ILau1, ILookup, IPartyResult} from "./types";
-  import {fetchConfig, fetchElectionStatus, fetchLau1, fetchPartyResults} from "../lib/api";
+  import type {
+    IConfig,
+    IElectionStatus,
+    ILau1,
+    ILookup,
+    IPartyResult,
+  } from "./types";
+  import {
+    fetchConfig,
+    fetchElectionStatus,
+    fetchLau1,
+    fetchPartyResults,
+    resultsPulished
+  } from "../lib/api";
   import RegionSelector from "./components/RegionSelector.svelte";
   import LoadingOverlay from "./components/LoadingOverlay.svelte";
+
+  let openErrorModal;
+  let areResultsPublished = true;
 
   let electionStatusLoading = false;
   let resultsFilterValue = null;
@@ -99,19 +116,16 @@
       lookup.lau1_to_code[loc.lau1_code] = loc;
       lookup.lau1_to_code[loc.code] = loc;
     }
-
-    // console.log(
-    //         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
-    //         lookup.counties["217"]
-    // );
-
-    console.log("lookup", lookup);
-
+    
     return lookup;
   }
 
-
   onMount(async () => {
+    areResultsPublished = await resultsPulished();
+    if(!areResultsPublished){
+      openErrorModal();
+      return;
+    }
     document.body.className = document.body.className
       ? document.body.className + " js-enabled"
       : "js-enabled";
@@ -122,10 +136,10 @@
     console.debug("lau1_map", lau1_map);
     lookup = createLookup(config);
 
-    partyResults = []
+    partyResults = [];
     partyResults = await fetchPartyResults();
     console.log("partyResults before sync", partyResults);
-    syncPartyResultsAndLookup(partyResults, lookup );
+    syncPartyResultsAndLookup(partyResults, lookup);
     console.log("partyResults on start", partyResults);
     console.debug("lookup", lookup);
 
@@ -146,7 +160,6 @@
     //     lookup.parties[partyResults[index].id] = partyResults[index];
     // });
 
-
     partiesInParliament = partyResults.filter((i) => i.in_parliament);
 
     candidatesInParliament = [];
@@ -164,7 +177,7 @@
     console.debug("candidates", candidates);
     console.debug("candidatesInParliament", candidatesInParliament);
 
-    electionsStatus = null   // show loading spinner
+    electionsStatus = null; // show loading spinner
     electionsStatus = await fetchElectionStatus();
     // console.log("electionsStatus", electionsStatus);
 
@@ -187,9 +200,8 @@
     console.log("localityResultsRegions", localityResultsRegions);
 
     initAll({});
-    fixIDSKtabs()
+    fixIDSKtabs();
   });
-
 
   /**
    * workaround to fix routify incompatibility with IDSK tabs by implementing tab switching logic by ourselves
@@ -199,20 +211,20 @@
       let hash = JQ(tab).data("href");
       JQ(hash).show();
       JQ(hash)
-              .parent()
-              .find(".govuk-tabs__panel:not(" + hash + ")")
-              .hide();
+        .parent()
+        .find(".govuk-tabs__panel:not(" + hash + ")")
+        .hide();
       JQ(hash)
-              .parent()
-              .parent()
-              .find(".govuk-tabs__list-item--selected")
-              .removeClass("govuk-tabs__list-item--selected");
+        .parent()
+        .parent()
+        .find(".govuk-tabs__list-item--selected")
+        .removeClass("govuk-tabs__list-item--selected");
       JQ('[data-href="' + hash + '"]')
-              .parent()
-              .addClass("govuk-tabs__list-item--selected");
+        .parent()
+        .addClass("govuk-tabs__list-item--selected");
     }
     JQ(".govuk-tabs__tab").click(function () {
-      changeTab(this)
+      changeTab(this);
     });
 
     JQ(".govuk-tabs__panel--hidden").hide();
@@ -236,15 +248,15 @@
       filter_type = "region";
       filter_value = selectedRegion;
     } else {
-      filter_type = ""
-      filter_value = ""
+      filter_type = "";
+      filter_value = "";
     }
 
     if (filter_type !== "") {
       // Get new nesults
       console.log("=======================================");
-      partyResults = []
-      let res = await getResultsByLocality(filter_type, filter_value)
+      partyResults = [];
+      let res = await getResultsByLocality(filter_type, filter_value);
 
       console.log("res from getResultsByLocality", res);
       // partyResults = [...res[0].parties];
@@ -256,12 +268,12 @@
       console.log("partyResults new", synced);
       // syncPartyResultsAndLookup(partyResults, lookup);
 
-      electionsStatus = null  // show loading spinner
+      electionsStatus = null; // show loading spinner
       electionsStatus = await fetchElectionStatus(filter_type, filter_value);
     } else {
-      partyResults = []
+      partyResults = [];
       partyResults = await fetchPartyResults();
-      electionsStatus = null  // show loading spinner
+      electionsStatus = null; // show loading spinner
       electionsStatus = await fetchElectionStatus();
       syncPartyResultsAndLookup(partyResults, lookup);
     }
@@ -272,7 +284,10 @@
   /**
    * On init sync info inside results and lookup for whole data
    */
-  function syncPartyResultsAndLookup(partyResults: IPartyResult[], lookup: ILookup) {
+  function syncPartyResultsAndLookup(
+    partyResults: IPartyResult[],
+    lookup: ILookup
+  ) {
     console.debug("syncPartyResultsAndLookup");
 
     partyResults.forEach((party, index) => {
@@ -314,7 +329,6 @@
     return results;
   }
 
-
   async function getResultsByLocality(
     localityType = "region",
     filter_value = null
@@ -334,147 +348,166 @@
   }
 </script>
 
-<div class="pt-5">
-  <h1 class="govuk-heading-xl mb-5">
-    Výsledky volieb - {selectedLocalityLabel}
-  </h1>
+<Modal bind:openModal={openErrorModal} isDismmisible={false}>
+  <span slot="title">Výsledky ešte neboli publikované</span>
+  <span slot="subtitle"
+    >Počkajte prosím do oficiálneho dátumu a času zverejnenia výsledkov a
+    načítajte stránku znovu</span
+  >
+</Modal>
 
-  {#if config}
-    <RegionSelector
-      REGIONS={config.regions}
-      COUNTRIES={config.counties}
-      MUNICIPALITIES={config.municipalities}
-      bind:selectedRegion={selectedRegion}
-      bind:selectedCounty={selectedCounty}
-      bind:selectedMunicipality={selectedMunicipality}
-      bind:selectedLocalityLabel={selectedLocalityLabel}
-    />
-  {/if}
+{#if areResultsPublished == true}
+  <div class="pt-5">
+    <h1 class="govuk-heading-xl mb-5">
+      Výsledky volieb - {selectedLocalityLabel}
+    </h1>
 
-  <section class="parties-graph mb-5" bind:clientWidth={barChartWidth}>
-    <div class="govuk-tabs">
-      <ul class="govuk-tabs__list">
-        <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
-          <a
-            class="govuk-tabs__tab"
-            data-href="#parties-tab-1"
-            href="javascript:void(0)"
-          >
-            Strany nad 5%
-          </a>
-        </li>
-        <li class="govuk-tabs__list-item">
-          <a
-            class="govuk-tabs__tab"
-            data-href="#parties-tab-2"
-            href="javascript:void(0)"
-          >
-            Všetky strany
-          </a>
-        </li>
-      </ul>
-      <div class="govuk-tabs__panel" id="parties-tab-1" >
-        <h2 class="govuk-heading-m">Strany nad 5%</h2>
-        {#if partyResults.length === 0}
-          <LoadingOverlay />
-        {/if}
-        <PartiesBarChart {partyResults} {barChartWidth} chartType={"elected"}  />
-      </div>
-      <div
-        class="govuk-tabs__panel govuk-tabs__panel--hidden"
-        id="parties-tab-2"
-      >
-        <h2 class="govuk-heading-m">Všetky strany</h2>
-        {#if partyResults.length === 0}
-          <LoadingOverlay />
-        {/if}
-        <PartiesBarChart {partyResults} {barChartWidth} chartType={"all"} />
-      </div>
-    </div>
-  </section>
+    {#if config}
+      <RegionSelector
+        REGIONS={config.regions}
+        COUNTRIES={config.counties}
+        MUNICIPALITIES={config.municipalities}
+        bind:selectedRegion
+        bind:selectedCounty
+        bind:selectedMunicipality
+        bind:selectedLocalityLabel
+      />
+    {/if}
 
-  <!--{#if resultsFilterStep === 'region' && selectedRegion === null}-->
-  <div class="partliament-graph mb-5 {(resultsFilterStep === 'region' && selectedRegion === null) ? '' : 'd-none'}">
-    <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
-    <div class="row">
-      <div class="col-10 mx-auto" style="min-height: 300px;">
-        <ParliamentSvgMap {partiesInParliament} {lookup} />
-      </div>
-    </div>
-  </div>
-  <!--{/if}-->
-
-  {#if resultsFilterStep === "region" && selectedRegion === null}
-    <RegionalWinnersCards {lookup} {localityResultsRegions} />
-  {/if}
-
-  {#if resultsFilterStep === "region" && selectedRegion === null}
-    <div class="country-map mb-5">
-      <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
-
+    <section class="parties-graph mb-5" bind:clientWidth={barChartWidth}>
       <div class="govuk-tabs">
         <ul class="govuk-tabs__list">
           <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
             <a
               class="govuk-tabs__tab"
-              data-href="#map-tab-1"
+              data-href="#parties-tab-1"
               href="javascript:void(0)"
             >
-              Okresy
+              Strany nad 5%
             </a>
           </li>
           <li class="govuk-tabs__list-item">
             <a
               class="govuk-tabs__tab"
-              data-href="#map-tab-2"
+              data-href="#parties-tab-2"
               href="javascript:void(0)"
             >
-              Kraje
+              Všetky strany
             </a>
           </li>
         </ul>
-        <section class="govuk-tabs__panel" id="map-tab-1">
-          <h2 class="govuk-heading-m">Výsledky podľa okresov</h2>
-          <SlovakiaMap
-            mapType={"counties"}
-            {partiesInParliament}
-            {lookup}
-            localityResults={localityResultsCounties}
-            uniqueID={"2"}
+        <div class="govuk-tabs__panel" id="parties-tab-1">
+          <h2 class="govuk-heading-m">Strany nad 5%</h2>
+          {#if partyResults.length === 0}
+            <LoadingOverlay />
+          {/if}
+          <PartiesBarChart
+            {partyResults}
+            {barChartWidth}
+            chartType={"elected"}
           />
-        </section>
-        <section
+        </div>
+        <div
           class="govuk-tabs__panel govuk-tabs__panel--hidden"
-          id="map-tab-2"
+          id="parties-tab-2"
         >
-          <h2 class="govuk-heading-m">Výsledky podľa krajov</h2>
-          <SlovakiaMap
-            mapType={"regions"}
-            {partiesInParliament}
-            {lookup}
-            localityResults={localityResultsRegions}
-            uniqueID={"1"}
-          />
-        </section>
+          <h2 class="govuk-heading-m">Všetky strany</h2>
+          {#if partyResults.length === 0}
+            <LoadingOverlay />
+          {/if}
+          <PartiesBarChart {partyResults} {barChartWidth} chartType={"all"} />
+        </div>
+      </div>
+    </section>
+
+    <!--{#if resultsFilterStep === 'region' && selectedRegion === null}-->
+    <div
+      class="partliament-graph mb-5 {resultsFilterStep === 'region' &&
+      selectedRegion === null
+        ? ''
+        : 'd-none'}"
+    >
+      <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
+      <div class="row">
+        <div class="col-10 mx-auto" style="min-height: 300px;">
+          <ParliamentSvgMap {partiesInParliament} {lookup} />
+        </div>
       </div>
     </div>
-  {/if}
+    <!--{/if}-->
 
-  <div class="elections-statistics mb-5">
-    <h2 class="govuk-heading-l text-center mb-3">Všeobecné štatistiky</h2>
-    <StatisticsTable {electionsStatus} />
-  </div>
+    {#if resultsFilterStep === "region" && selectedRegion === null}
+      <RegionalWinnersCards {lookup} {localityResultsRegions} />
+    {/if}
 
-  <div class="parties-table mb-5">
-    <h2 class="govuk-heading-l text-center mb-3">Výsledky strán</h2>
-    <PartiesTable {partyResults} />
-  </div>
+    {#if resultsFilterStep === "region" && selectedRegion === null}
+      <div class="country-map mb-5">
+        <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
 
-  <div class="candidates-table mb-5">
-    <h2 class="govuk-heading-l text-center mb-3">Poslanci</h2>
-    <CandidatesTable
-      data={candidates.sort((a, b) => b.doc_count - a.doc_count)}
-      {lookup}
-    />
+        <div class="govuk-tabs">
+          <ul class="govuk-tabs__list">
+            <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+              <a
+                class="govuk-tabs__tab"
+                data-href="#map-tab-1"
+                href="javascript:void(0)"
+              >
+                Okresy
+              </a>
+            </li>
+            <li class="govuk-tabs__list-item">
+              <a
+                class="govuk-tabs__tab"
+                data-href="#map-tab-2"
+                href="javascript:void(0)"
+              >
+                Kraje
+              </a>
+            </li>
+          </ul>
+          <section class="govuk-tabs__panel" id="map-tab-1">
+            <h2 class="govuk-heading-m">Výsledky podľa okresov</h2>
+            <SlovakiaMap
+              mapType={"counties"}
+              {partiesInParliament}
+              {lookup}
+              localityResults={localityResultsCounties}
+              uniqueID={"2"}
+            />
+          </section>
+          <section
+            class="govuk-tabs__panel govuk-tabs__panel--hidden"
+            id="map-tab-2"
+          >
+            <h2 class="govuk-heading-m">Výsledky podľa krajov</h2>
+            <SlovakiaMap
+              mapType={"regions"}
+              {partiesInParliament}
+              {lookup}
+              localityResults={localityResultsRegions}
+              uniqueID={"1"}
+            />
+          </section>
+        </div>
+      </div>
+    {/if}
+
+    <div class="elections-statistics mb-5">
+      <h2 class="govuk-heading-l text-center mb-3">Všeobecné štatistiky</h2>
+      <StatisticsTable {electionsStatus} />
+    </div>
+
+    <div class="parties-table mb-5">
+      <h2 class="govuk-heading-l text-center mb-3">Výsledky strán</h2>
+      <PartiesTable {partyResults} />
+    </div>
+
+    <div class="candidates-table mb-5">
+      <h2 class="govuk-heading-l text-center mb-3">Poslanci</h2>
+      <CandidatesTable
+        data={candidates.sort((a, b) => b.doc_count - a.doc_count)}
+        {lookup}
+      />
+    </div>
   </div>
-</div>
+{/if}

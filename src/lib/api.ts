@@ -21,6 +21,9 @@ export async function fetchLau1(): Promise<ILau1> {
     return (await axios.get("api/lau1_codes.json")).data;
 }
 
+export async function resultsPulished(): Promise<boolean> {
+    return (await axios.get(baseApiUrl("/elastic/results/status"))).data.published == true;
+}
 
 export async function fetchPartyResults(): Promise<IPartyResult[]> {
     const response = await axios
