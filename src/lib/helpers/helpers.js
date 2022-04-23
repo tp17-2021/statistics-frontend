@@ -1,3 +1,5 @@
+export const isDevelopmentMode = process.env.NODE_ENV === "development"
+
 export const abbr = function(x, count = 4) {
     let is_cut = x.length > count;
     count = x.length < count ? x.length : count;
