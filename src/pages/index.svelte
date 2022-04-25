@@ -42,7 +42,7 @@
   import LoadingOverlay from "./components/LoadingOverlay.svelte";
 
   let openErrorModal;
-  let areResultsPublished = true;
+  let areResultsPublished = false;
 
   let electionStatusLoading = false;
   let resultsFilterValue = null;
