@@ -9,7 +9,7 @@
     <slot />
 </main>
 
-<footer class="footer bg-secondary text-white py-5">
+<footer class="footer idsk-footer">
     <div class="container">
        <div class="text-center">
             &copy; 2022

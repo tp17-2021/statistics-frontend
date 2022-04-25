@@ -1,5 +1,13 @@
 <script>
 import {url} from "@roxi/routify";
+
+	import {authenticated, jwt} from "../../../lib/stores";
+
+    function logoutButton(){
+        console.log("logout")
+        $authenticated = false;
+        $jwt = "";
+    }
 </script>
 
 <style lang="scss">
@@ -29,6 +37,13 @@ import {url} from "@roxi/routify";
 		margin: 0 auto;
 	}
 
+	.logout-button-wrapper {
+		margin-left: auto;
+		.idsk-button {
+			margin-bottom: 0;
+		}
+	}
+
 
 	img {
 		margin-right: 1rem;
@@ -40,6 +55,13 @@ import {url} from "@roxi/routify";
 		<div class="header-content">
 			<img src="{$url('/img/sk.png')}" alt="" height="50px">
 			<div>Voľby</div>
+			{#if $authenticated === true }
+				<div class="logout-button-wrapper">
+					<button class="idsk-button idsk-button--secondary" data-module="idsk-button" on:click={() => logoutButton()}>
+						Odhlásiť
+					</button>
+				</div>
+			{/if}
 		</div>
 	</div>
 </header>

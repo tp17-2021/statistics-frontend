@@ -1,16 +1,9 @@
 <script lang="ts">
     import {onDestroy, onMount} from "svelte";
-    import {authenticated, jwt} from "../../lib/stores";
     import Panel from "../../lib/components/Panel.svelte";
     import { getResultsStatus, publishResults, hideResults } from "../../lib/api";
 
     let electionResultsPublished = undefined;
-
-    function logoutButton(){
-        console.log("logout")
-        $authenticated = false;
-        $jwt = "";
-    }
 
     function publishResultsButton() {
         publishResults().finally(function (){
@@ -60,11 +53,6 @@
                         Publikovať výsledky
                     </button>
                 {/if}
-            </div>
-            <div class="d-grid">
-                <button class="idsk-button idsk-button--warning" data-module="idsk-button" on:click={() => logoutButton()}>
-                    Odhlásiť
-                </button>
             </div>
         </div>
       </div>
