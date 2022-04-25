@@ -43,13 +43,13 @@
                 {/if}
             </div>
 
-            <div class="d-grid mb-5">
+            <div class="mb-5">
                 {#if electionResultsPublished === true }
-                    <button class="idsk-button idsk-button mb-0" data-module="idsk-button" on:click={() => hideResultsButton()} >
+                    <button class="idsk-button idsk-button idsk-button--secondary mb-0" data-module="idsk-button" on:click={() => hideResultsButton()} >
                         Skryť výsledky
                     </button>
                 {:else}
-                    <button class="idsk-button idsk-button mb-0" data-module="idsk-button" on:click={() => publishResultsButton()} >
+                    <button class="idsk-button idsk-button idsk-button--secondary mb-0" data-module="idsk-button" on:click={() => publishResultsButton()} >
                         Publikovať výsledky
                     </button>
                 {/if}
