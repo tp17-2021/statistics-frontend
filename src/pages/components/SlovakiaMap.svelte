@@ -153,9 +153,9 @@
                             if(i < 6){
                                 text += `
                                 <div class="d-flex ">
-                                    <div class="party-name">${lookup.parties[party.id].abbr}%</div>
+                                    <div class="party-name">${lookup.parties[party.id].abbr}</div>
                                     <div class="progress mb-1 w-100" style="height: 2rem;">
-                                        <div class="progress-bar" role="progressbar" style="width: ${party.percentage * first_party_percentage_coefficient}%; background-color: ${lookup.parties[party.id].color}" aria-valuenow="${party.percentage}" aria-valuemin="0" aria-valuemax="100">${lookup.parties[party.id].abbr}</div>
+                                        <div class="progress-bar" role="progressbar" style="width: ${party.percentage * first_party_percentage_coefficient}%; background-color: ${lookup.parties[party.id].color}" aria-valuenow="${party.percentage}" aria-valuemin="0" aria-valuemax="100">${ Math.round(party.percentage * 100) / 100} %</div>
                                     </div>
                                 </div>
                                 `;
