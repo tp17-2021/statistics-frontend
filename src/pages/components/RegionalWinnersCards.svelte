@@ -31,11 +31,11 @@
                             <div
                                 class="idsk-heading idsk-heading-basic text-center"
                             >
-                                <a
+                                <span
                                     href="#"
                                     class="idsk-card-title govuk-link"
                                     title="Lorem ipsum dolor sit amet: consectetur adipiscing elit!"
-                                    >{lookup.regions[region_data.code].name}</a
+                                    >{lookup.regions[region_data.code].name}</span
                                 >
                             </div>
 
@@ -90,4 +90,8 @@
             align-items: center;
             margin-right: 1rem;
         }
+
+    .idsk-card-title {
+        text-decoration: none;
+    }
 </style>
