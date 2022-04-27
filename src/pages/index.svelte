@@ -168,10 +168,12 @@
         if (candidate.in_parliament) {
           candidatesInParliament = [...candidatesInParliament, candidate];
         }
-        candidates = [...candidates, candidate];
+        // candidates = [...candidates, candidate];
         candidates.push(candidate);
       });
     });
+    candidates = [...candidates];
+
 
     console.debug("partiesInParliament", partiesInParliament);
     console.debug("candidates", candidates);
