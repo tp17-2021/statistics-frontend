@@ -36,12 +36,12 @@
                         <td class="govuk-table__cell govuk-table__cell--numeric">{electionsStatus.number_of_polling_places}</td>
                     {/if}
                 </tr>
-                <tr class="govuk-table__row">
+                <!-- <tr class="govuk-table__row">
                     <th class="govuk-table__cell">Počet prázdnych hlasov:</th>
                     {#if electionsStatus}
                         <td class="govuk-table__cell govuk-table__cell--numeric">TODO</td>
                     {/if}
-                </tr>
+                </tr> -->
                 </tbody>
             </table>
         </div>
