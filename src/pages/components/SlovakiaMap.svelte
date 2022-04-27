@@ -147,7 +147,7 @@
                         let first_party_percentage_coefficient = 100 / res.parties[0].percentage;
 
                         tooltipLabel.text(locationName);
-                        tooltipAttendance.text("Volebna ucast: " + res.participation + "%");
+                        tooltipAttendance.text("Volebná účasť: " + res.participation + "%");
 
                         res.parties.forEach((party, i) => {
                             if(i < 6){
