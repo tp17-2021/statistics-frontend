@@ -277,6 +277,9 @@
       electionsStatus = await fetchElectionStatus(filter_type, filter_value);
     } else {
       setTimeout(()=>{
+        if (reload_graph == true) {
+          location.reload()
+        }
         reload_graph = !reload_graph  // just change the value to different value to refresh, doesn't matter what the value
         console.log("reload_graph", reload_graph)
       }, 1000)
