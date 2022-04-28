@@ -40,7 +40,7 @@
                             </div>
 
                             <div class="mb-3 text-center small">
-                                Volebná účasť: {region_data.participation}
+                                Volebná účasť: {region_data.participation}&nbsp;%
                             </div>
 
                             <p class="idsk-body idsk-body-basic">
