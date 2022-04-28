@@ -232,6 +232,8 @@
     JQ(".govuk-tabs__panel--hidden").hide();
   }
 
+  let reload_graph = false;
+
   async function onFilterValueChange(
     selectedMunicipality,
     selectedCounty,
@@ -255,6 +257,7 @@
     }
 
     if (filter_type !== "") {
+
       // Get new nesults
       console.log("=======================================");
       partyResults = [];
@@ -273,6 +276,11 @@
       electionsStatus = null; // show loading spinner
       electionsStatus = await fetchElectionStatus(filter_type, filter_value);
     } else {
+      setTimeout(()=>{
+        reload_graph = !reload_graph  // just change the value to different value to refresh, doesn't matter what the value
+        console.log("reload_graph", reload_graph)
+      }, 1000)
+
       partyResults = [];
       partyResults = await fetchPartyResults();
       electionsStatus = null; // show loading spinner
@@ -376,6 +384,7 @@
       />
     {/if}
 
+    <!--{#if !reload_graph}-->
     <section class="parties-graph mb-5" bind:clientWidth={barChartWidth}>
       <div class="govuk-tabs">
         <ul class="govuk-tabs__list">
@@ -407,6 +416,7 @@
             {partyResults}
             {barChartWidth}
             chartType={"elected"}
+            {reload_graph}
           />
         </div>
         <div
@@ -417,10 +427,11 @@
           {#if partyResults.length === 0}
             <LoadingOverlay />
           {/if}
-          <PartiesBarChart {partyResults} {barChartWidth} chartType={"all"} />
+          <PartiesBarChart {partyResults} {barChartWidth} chartType={"all"} {reload_graph} />
         </div>
       </div>
     </section>
+    <!--{/if}-->
 
     <!--{#if resultsFilterStep === 'region' && selectedRegion === null}-->
     <div

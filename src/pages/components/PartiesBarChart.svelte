@@ -5,10 +5,11 @@
   export let partyResults;
   export let chartType = "elected";
   export let barChartWidth;
+  export let reload_graph = false
   let chartElement = null;
   let partiesChart = null;
 
-  $: renderPartyBarChart(partyResults, barChartWidth);
+  $: renderPartyBarChart(partyResults, barChartWidth, reload_graph);
 
   function renderPartyBarChart(data, width) {
     console.log("Rendering party bar chart innerWidth", window.innerWidth);
