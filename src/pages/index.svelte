@@ -40,6 +40,7 @@
   } from "../lib/api";
   import RegionSelector from "./components/RegionSelector.svelte";
   import LoadingOverlay from "./components/LoadingOverlay.svelte";
+  import Button from "../lib/components/buttons/Button.svelte";
 
   let openErrorModal;
   let areResultsPublished = false;
@@ -369,11 +370,22 @@
   >
 </Modal>
 
+<div class="refreshbtn" style="margin-top: 1rem;max-width: 200px">
+  <Button on:click={()=>location.reload()}>
+    Obnoviť
+  </Button>
+</div>
+
+
 {#if areResultsPublished == true}
   <div class="pt-5">
-    <h1 class="govuk-heading-xl mb-5">
-      Výsledky volieb - {selectedLocalityLabel}
-    </h1>
+      <h1 class="govuk-heading-xl mb-5">
+        Výsledky volieb - {selectedLocalityLabel}
+      </h1>
+
+
+
+
 
     {#if config}
       <RegionSelector
@@ -527,3 +539,12 @@
     </div>
   </div>
 {/if}
+
+
+<style lang="scss">
+  .refreshbtn {
+    position: fixed;
+    bottom: 10px;
+    right: 20px;
+  }
+</style>
