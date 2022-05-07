@@ -21,7 +21,7 @@
         </thead>
         <tbody class="govuk-table__body">
             {#each partyResults as party, i}
-                <tr class="govuk-table__row">
+                <tr class="govuk-table__row" data-party-number={party.party_number}>
                     <td class="govuk-table__cell">{i + 1}</td>
                     <td class="govuk-table__cell">
                         <div class="d-flex align-items-center">
@@ -31,9 +31,9 @@
                             <div>{party.name}</div>
                         </div>
                     </td>
-                    <td class="govuk-table__cell govuk-table__cell--numeric">{party.doc_count}</td>
-                    <td class="govuk-table__cell govuk-table__cell--numeric">{Math.round(party.percentage * 100) / 100} %</td>
-                    <td class="govuk-table__cell govuk-table__cell--numeric">{party.seats ?? '-'}</td>
+                    <td class="govuk-table__cell govuk-table__cell--numeric votes-count">{party.doc_count}</td>
+                    <td class="govuk-table__cell govuk-table__cell--numeric percentage">{Math.round(party.percentage * 100) / 100} %</td>
+                    <td class="govuk-table__cell govuk-table__cell--numeric seats">{party.seats ?? '-'}</td>
                 </tr>
             {/each}
         </tbody>
