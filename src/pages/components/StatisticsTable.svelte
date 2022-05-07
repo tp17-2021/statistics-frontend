@@ -15,25 +15,25 @@
             <table class="govuk-table">
                 <tbody class="govuk-table__body">
                 <tr class="govuk-table__row">
-                    <th class="govuk-table__cell">Volebná účasť:</th>
-                    <td class="govuk-table__cell govuk-table__cell--numeric">
+                    <th class="govuk-table__cell participation-title">Volebná účasť:</th>
+                    <td class="govuk-table__cell govuk-table__cell--numeric participation-value">
                         {#if electionsStatus}
                             {electionsStatus.participation} %
                         {/if}
                     </td>
                 </tr>
                 <tr class="govuk-table__row">
-                    <th class="govuk-table__cell">Počet hlasov spolu:</th>
-                    <td class="govuk-table__cell govuk-table__cell--numeric">
+                    <th class="govuk-table__cell votes-count-title">Počet hlasov spolu:</th>
+                    <td class="govuk-table__cell govuk-table__cell--numeric votes-count-value">
                         {#if electionsStatus}
                             {electionsStatus.total_votes}
                         {/if}
                     </td>
                 </tr>
                 <tr class="govuk-table__row">
-                    <th class="govuk-table__cell">Počet volebných miestnosti:</th>
+                    <th class="govuk-table__cell polling-places-count-title">Počet volebných miestnosti:</th>
                     {#if electionsStatus}
-                        <td class="govuk-table__cell govuk-table__cell--numeric">{electionsStatus.number_of_polling_places}</td>
+                        <td class="govuk-table__cell govuk-table__cell--numeric polling-places-count-value">{electionsStatus.number_of_polling_places}</td>
                     {/if}
                 </tr>
                 <!-- <tr class="govuk-table__row">
