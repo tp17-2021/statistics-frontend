@@ -3,7 +3,7 @@
     // TODO existuje aj region zahranicie v datach zo serveru, to treba tiez nejako spravit
     // TODO treba upravit seedovanie tak aby sa rozlisili vysledky pre lokality
 
-    import { abbr, baseApiUrl } from "../../lib/helpers/helpers.js";
+    import { abbr, addZeroes, baseApiUrl } from "../../lib/helpers/helpers.js";
     import { onMount } from "svelte";
 
     // Source of codes and inspiration
@@ -147,7 +147,7 @@
                         let first_party_percentage_coefficient = 100 / res.parties[0].percentage;
 
                         tooltipLabel.text(locationName);
-                        tooltipAttendance.text("Volebná účasť: " + res.participation + "%");
+                        tooltipAttendance.text("Volebná účasť: " + addZeroes(res.participation) + "%");
 
                         res.parties.forEach((party, i) => {
                             if(i < 6){
@@ -155,7 +155,7 @@
                                 <div class="d-flex ">
                                     <div class="party-name">${lookup.parties[party.id].abbr}</div>
                                     <div class="progress mb-1 w-100" style="height: 2rem;">
-                                        <div class="progress-bar" role="progressbar" style="width: ${party.percentage * first_party_percentage_coefficient}%; background-color: ${lookup.parties[party.id].color}" aria-valuenow="${party.percentage}" aria-valuemin="0" aria-valuemax="100">${ Math.round(party.percentage * 100) / 100} %</div>
+                                        <div class="progress-bar" role="progressbar" style="width: ${party.percentage * first_party_percentage_coefficient}%; background-color: ${lookup.parties[party.id].color}" aria-valuenow="${party.percentage}" aria-valuemin="0" aria-valuemax="100">${ addZeroes(Math.round(party.percentage * 100) / 100)} %</div>
                                     </div>
                                 </div>
                                 `;

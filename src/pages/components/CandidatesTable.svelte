@@ -2,7 +2,7 @@
   export let data;
   export let lookup;
 
-  import { abbr, getCandidateFullName } from "../../lib/helpers/helpers.js";
+  import { abbr, addZeroes, getCandidateFullName } from "../../lib/helpers/helpers.js";
   import { searchAndPaginate } from "../../lib/components/pagination/paginate";
   import PaginationLinks from "../../lib/components/pagination/PaginationLinks.svelte";
   import type { IpaginationObject } from "../../lib/components/pagination/paginate";
@@ -176,7 +176,7 @@
               >{candidate.doc_count}</td
             >
             <td class="govuk-table__cell govuk-table__cell--numeric"
-              >{Math.round(candidate.percentage * 100) / 100} %
+              >{addZeroes(Math.round(candidate.percentage * 100) / 100)} %
             </td>
           </tr>
         {/each}

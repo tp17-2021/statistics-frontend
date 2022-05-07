@@ -1,6 +1,6 @@
 <script>
     import LoadingOverlay from "./LoadingOverlay.svelte";
-
+    import { addZeroes } from "../../lib/helpers/helpers";
     export let partyResults;
 </script>
 
@@ -32,7 +32,7 @@
                         </div>
                     </td>
                     <td class="govuk-table__cell govuk-table__cell--numeric votes-count">{party.doc_count}</td>
-                    <td class="govuk-table__cell govuk-table__cell--numeric percentage">{Math.round(party.percentage * 100) / 100} %</td>
+                    <td class="govuk-table__cell govuk-table__cell--numeric percentage">{addZeroes(Math.round(party.percentage * 100) / 100)} %</td>
                     <td class="govuk-table__cell govuk-table__cell--numeric seats">{party.seats ?? '-'}</td>
                 </tr>
             {/each}

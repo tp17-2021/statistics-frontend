@@ -1,6 +1,6 @@
 <script>
   import Chart from "chart.js/auto";
-  import { abbr } from "../../lib/helpers/helpers.js";
+  import { addZeroes, roundTwoDecimal } from "../../lib/helpers/helpers.js";
 
   export let partyResults;
   export let chartType = "elected";
@@ -46,7 +46,7 @@
             backgroundColor: data.map((party) => {
               return party.percentage > 5 ? party.color : "#ccc";
             }),
-            data: data.map((party) => party.percentage),
+            data: data.map((party) => addZeroes(roundTwoDecimal(party.percentage))),
           },
         ],
       },

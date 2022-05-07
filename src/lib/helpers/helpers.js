@@ -19,3 +19,14 @@ export const getCandidateFullName = function(c) {
     let x = c.degrees_before ? c.degrees_before + " " : "";
     return x + c.first_name + " " + c.last_name;
 }
+
+export const addZeroes = function(num) {
+    num = typeof num === "number" ? num.toString() : num;
+    const dec = num.split('.')[1]
+    const len = dec && dec.length > 2 ? dec.length : 2
+    return Number(num).toFixed(len)
+}
+
+export const roundTwoDecimal = function(num) {
+    return Math.round(num * 100) / 100;
+}
