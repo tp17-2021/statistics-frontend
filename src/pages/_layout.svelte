@@ -12,7 +12,7 @@
 <footer class="footer idsk-footer">
     <div class="container">
        <div class="text-center">
-            &copy; 2022
+            <b>ELECTIE</b> - Elektronizácia volebného systému, Tímový projekt FIIT STU &copy; 2022
        </div>
     </div>
 </footer>
