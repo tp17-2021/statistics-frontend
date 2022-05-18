@@ -1,31 +1,49 @@
 <script>
+  import LoadingOverlay from "./LoadingOverlay.svelte";
+
   export let partiesInParliament;
   export let lookup;
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import * as JQProxy from "jquery";
-  const JQ = (JQProxy).default || JQProxy;
+  const JQ = JQProxy.default || JQProxy;
   import * as d3 from "d3";
   import { abbr, getCandidateFullName } from "../../lib/helpers/helpers.js";
 
-  onMount(async () => {
-    // console.log("Parliament map on mount");
-    // console.log(partiesInParliament);
-    setUpParliamentDiagramResults(partiesInParliament);
+  import _ from "lodash";
+
+  let parliamentMapWrapperWidth;
+  let loaded = false;
+
+  onDestroy(() => {
+    JQ(parliamentMap).empty();
   });
 
-  $: {
-    setUpParliamentDiagramResults(partiesInParliament);
-  }
+  const debounce_setUpParliamentDiagramResults = _.debounce(() => {
+    setUpParliamentDiagramResults(
+      partiesInParliament,
+      parliamentMapWrapperWidth
+    );
+  }, 500);
+
+  $: debounce_setUpParliamentDiagramResults(
+    partiesInParliament,
+    parliamentMapWrapperWidth
+  );
+
+  // $: console.log("parliamentMapWrapperWidth", parliamentMapWrapperWidth);
 
   function setUpParliamentDiagramResults(partiesInParliament) {
+    loaded = false;
+    JQ(parliamentMap).empty();
     if (!partiesInParliament.length) {
       return;
     }
 
-    var JQparliament_wrapper = JQ("#parliament-map");
+    let JQparliamentMap = JQ(parliamentMap);
+    let JQparliamentMapWrapper = JQ(parliamentMapWrapper);
 
-    var w = JQparliament_wrapper.parent().width(),
-      h = Math.floor(JQparliament_wrapper.parent().width() * 0.7),
+    let w = JQparliamentMapWrapper.width(),
+      h = Math.floor(JQparliamentMapWrapper.width() * 0.7),
       d = Math.min(w, h * 1.5),
       r0 = d * 0.2,
       r1 = d * 0.45,
@@ -91,6 +109,7 @@
       dots_total += dot_cnt;
     });
     calcCircleOrderAndLabels();
+    loaded = true;
   }
 
   function Arc(r) {
@@ -164,6 +183,7 @@
         // );
         JQ(".seat-" + available_seats_in_order[i])
           .attr("data-parliament-member", candidate.id)
+          .attr("data-party-id", party.id)
           .attr("fill", party.color);
       });
 
@@ -178,6 +198,7 @@
 
     var jq_tooltip = JQ(".parliament-tooltip");
     var tooltipLabel = tooltip.append("div").attr("class", "label");
+    var tooltipPartyLabel = tooltip.append("div").attr("class", "party");
     var tooltipCount = tooltip.append("div").attr("class", "count");
     var tooltipPercent = tooltip.append("div").attr("class", "percent");
     // console.log(tooltip);
@@ -191,18 +212,26 @@
         // console.log(e.target);
         let elem = JQ(e.target);
         let memberId = elem.data("parliament-member");
+        let partyId = elem.data("party-id");
         if (memberId) {
           let member = lookup.candidates[memberId];
 
-          tooltipLabel.text(getCandidateFullName(member));
+          tooltipLabel.html(
+            "<span>" + getCandidateFullName(member) + "</span><hr>"
+          );
+          tooltipPartyLabel.text(lookup.parties[partyId].name);
           tooltipCount.text("Počet hlasov: " + member.doc_count);
           tooltipPercent.text("Percent: " + member.percentage);
 
           console.log("tooltip offsets", jq_tooltip.height());
+          // let top = elem.position().top - (jq_tooltip.height() + 32) + "px"
+          let parentPos = parliamentMapWrapper.getBoundingClientRect();
+          let childPos = e.target.getBoundingClientRect();
+          let left = childPos.left - parentPos.left - 12 + "px";
+          let top =
+            childPos.top - parentPos.top - (jq_tooltip.height() + 32) + "px";
 
-          tooltip
-            .style("top", elem.offset().top - (jq_tooltip.height() + 32) + "px")
-            .style("left", elem.offset().left - 12 + "px");
+          tooltip.style("top", top).style("left", left);
 
           return tooltip.style("visibility", "visible");
         }
@@ -214,10 +243,21 @@
         return tooltip.style("visibility", "hidden");
       });
   }
+
+  // DOM variables:
+  let parliamentMapWrapper;
+  let parliamentMap;
 </script>
 
-<div id="parliament-map-wrapper">
-  <div id="parliament-map" />
+<div
+  id="parliament-map-wrapper"
+  bind:this={parliamentMapWrapper}
+  bind:clientWidth={parliamentMapWrapperWidth}
+>
+  {#if !loaded}
+    <LoadingOverlay />
+  {/if}
+  <div id="parliament-map" bind:this={parliamentMap} />
 </div>
 
 <div id="parliament-map-legend">
@@ -225,7 +265,7 @@
     {#each partiesInParliament as party, i}
       <div class="col-auto">
         <div
-          class="card border-0 px-3 py-2 d-flex flex-column text-white shadow"
+          class="card border-0 px-1 px-md-3 py-2 d-flex flex-column text-white shadow"
           style="background-color: {party.color}"
         >
           <div class="seat-count text-center">{party.seats}</div>
@@ -247,9 +287,10 @@
     font-family: Helvetica;
     position: absolute;
     visibility: hidden;
-    text-align: center;
+    text-align: left;
     padding: 16px;
     z-index: 10;
+    font-size: 1.125rem;
 
     :global(.label) {
       font-size: 1.25rem;
@@ -262,15 +303,28 @@
       font-size: 1.125rem;
     }
   }
+  :global(circle):hover {
+    filter: brightness(0.5);
+  }
+
+  #parliament-map-wrapper {
+    position: relative;
+  }
 
   #parliament-map-legend {
     .card {
       width: 120px;
       padding: 1rem;
       // min-height: 100px;
+      font-size: 16px;
 
+      @media screen and (max-width: 600px) {
+        width: 80px;
+        font-size: 12px;
+        padding: 0.5rem;
+      }
       .seat-count {
-        font-size: 1.5rem;
+        font-size: 1.5em;
       }
 
       .party-name {
@@ -278,9 +332,12 @@
         align-items: center;
         justify-content: center;
         text-align: center;
-        font-size: 0.9rem;
+        font-size: 0.9em;
         line-break: anywhere;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.5em;
+        @media screen and (max-width: 600px) {
+          font-size: 0.7em;
+        }
       }
     }
   }

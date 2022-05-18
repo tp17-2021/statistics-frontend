@@ -9,8 +9,10 @@
     <slot />
 </main>
 
-<div class="footer bg-secondary text-white py-5">
+<footer class="footer idsk-footer">
     <div class="container">
-        &copy;
+       <div class="text-center">
+            <b>ELECTIE</b> - Elektronizácia volebného systému, Tímový projekt FIIT STU &copy; 2022
+       </div>
     </div>
-</div>
+</footer>

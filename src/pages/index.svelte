@@ -1,18 +1,16 @@
-<script>
+<script lang="ts">
   // TODO chyba znovu vybrat ten isty kraj
   // TODO, filtrovanie podla strany v tabulke kandidatov
-  import Chart from "chart.js/auto";
   import { onMount } from "svelte";
   import axios from "axios";
   import * as JQProxy from "jquery";
   const JQ = JQProxy.default || JQProxy;
-  import * as d3 from "d3";
 
-  import { abbr, baseApiUrl } from "../lib/helpers/helpers.js";
+  import { baseApiUrl } from "../lib/helpers/helpers.js";
 
   import { initAll } from "@id-sk/frontend/idsk/all.js";
 
-  import Tooltip from "sv-bootstrap-tooltip";
+  // import Tooltip from "sv-bootstrap-tooltip";
   import PartiesTable from "../pages/components/PartiesTable.svelte";
   import PartiesBarChart from "./components/PartiesBarChart.svelte";
   import SlovakiaMap from "../pages/components/SlovakiaMap.svelte";
@@ -21,48 +19,66 @@
   import StatisticsTable from "../pages/components/StatisticsTable.svelte";
   import RegionalWinnersCards from "../pages/components/RegionalWinnersCards.svelte";
 
-  import { filter } from "d3";
+  import Modal from "../lib/components/Modal.svelte";
 
+  // import { filter } from "d3";
+
+  // types and interfaces
+  import type {
+    IConfig,
+    IElectionStatus,
+    ILau1,
+    ILookup,
+    IPartyResult,
+  } from "./types";
+  import {
+    fetchConfig,
+    fetchElectionStatus,
+    fetchLau1,
+    fetchPartyResults,
+    resultsPulished
+  } from "../lib/api";
+  import RegionSelector from "./components/RegionSelector.svelte";
+  import LoadingOverlay from "./components/LoadingOverlay.svelte";
+  import Button from "../lib/components/buttons/Button.svelte";
+
+  let openErrorModal;
+  let areResultsPublished = false;
+
+  let electionStatusLoading = false;
   let resultsFilterValue = null;
   let resultsFilterStep = "region";
-  let selectedLocalityLabel = "Celé Slovensko";
-  let selectedRegion = "";
-  let selectedCounty = "";
-  let selectedMunicipality = "";
+
+  // Handled by RegionSelector.svelte
+  let selectedLocalityLabel = "";
+  let selectedRegion = null;
+  let selectedCounty = null;
+  let selectedMunicipality = null;
+  // end
+
   let referenceEle;
   let localityResultsCounties = null;
   let localityResultsRegions = null;
-  let partyResults = [];
-  let electionsStatus = [];
+  let partyResults: IPartyResult[] = [];
+  let electionsStatus: IElectionStatus = null;
   let partiesInParliament = [];
   let candidates = [];
   let candidatesInParliament = [];
-  let config = null;
-  let lau1_map = null;
-  let lookup = {
-    parties: {},
-    candidates: {},
-    municipalities: {},
-    counties: {},
-    regions: {},
+  let barChartWidth = null;
+  let config: IConfig = null;
+  let lau1_map: ILau1 = null;
+  let lookup: ILookup = {
+    parties: [],
+    candidates: [],
+    municipalities: [],
+    counties: [],
+    regions: [],
     lau1_to_code: {},
     code_to_lau1: {},
     nuts3_to_region_code: {},
   };
 
-  onMount(async () => {
-    document.body.className = document.body.className
-      ? document.body.className + " js-enabled"
-      : "js-enabled";
-
-    setTimeout(() => {
-      initAll();
-    }, 5000);
-
-    config = (await axios.get("api/config.json")).data;
-    lau1_map = (await axios.get("api/lau1_codes.json")).data;
-    console.log("config", config);
-    console.log("lau1_map", lau1_map);
+  function createLookup(config: IConfig): ILookup {
     config.parties.forEach((party) => {
       let partyWithoutCandidates = Object.assign({}, party);
       delete partyWithoutCandidates.candidates;
@@ -97,15 +113,36 @@
       SK042: 8,
     };
 
-    console.log(
-      "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm",
-      lookup.counties["217"]
-    );
+    for (let loc of lau1_map) {
+      lookup.lau1_to_code[loc.lau1_code] = loc;
+      lookup.lau1_to_code[loc.code] = loc;
+    }
+    
+    return lookup;
+  }
 
-    partyResults = await getPartyResults();
-    syncPartyResultsAndLookup();
+  onMount(async () => {
+    areResultsPublished = await resultsPulished();
+    if(!areResultsPublished){
+      openErrorModal();
+      return;
+    }
+    document.body.className = document.body.className
+      ? document.body.className + " js-enabled"
+      : "js-enabled";
 
+    config = await fetchConfig();
+    lau1_map = await fetchLau1();
+    console.debug("config", config);
+    console.debug("lau1_map", lau1_map);
+    lookup = createLookup(config);
+
+    partyResults = [];
+    partyResults = await fetchPartyResults();
+    console.log("partyResults before sync", partyResults);
+    syncPartyResultsAndLookup(partyResults, lookup);
     console.log("partyResults on start", partyResults);
+    console.debug("lookup", lookup);
 
     // partyResults.forEach((party, index) => {
     //     party.candidates.forEach((candidate, c_index) => {
@@ -124,34 +161,27 @@
     //     lookup.parties[partyResults[index].id] = partyResults[index];
     // });
 
-    lau1_map.forEach((loc) => {
-      lookup.lau1_to_code[loc.lau1_code] = loc;
-      lookup.lau1_to_code[loc.code] = loc;
-    });
-
-    console.log("lookup", lookup);
-    console.log("partyResults", partyResults);
-
     partiesInParliament = partyResults.filter((i) => i.in_parliament);
 
-    let ttt = [];
+    candidatesInParliament = [];
     partyResults.forEach((party, index) => {
-      party.candidates.forEach((c) => {
-        if (c.in_parliament) {
-          ttt.push(c);
+      party.candidates.forEach((candidate) => {
+        if (candidate.in_parliament) {
+          candidatesInParliament = [...candidatesInParliament, candidate];
         }
-        candidates.push(c);
+        // candidates = [...candidates, candidate];
+        candidates.push(candidate);
       });
     });
     candidates = [...candidates];
-    candidatesInParliament = [...ttt];
 
-    console.log("partiesInParliament", partiesInParliament);
-    console.log("candidates", candidates);
-    console.log("candidatesInParliament", candidatesInParliament);
 
-    electionsStatus = await getElectionsStatus();
+    console.debug("partiesInParliament", partiesInParliament);
+    console.debug("candidates", candidates);
+    console.debug("candidatesInParliament", candidatesInParliament);
 
+    electionsStatus = null; // show loading spinner
+    electionsStatus = await fetchElectionStatus();
     // console.log("electionsStatus", electionsStatus);
 
     // console.log("Loaded");
@@ -172,11 +202,17 @@
     localityResultsRegions = tmp;
     console.log("localityResultsRegions", localityResultsRegions);
 
-    // fix routify error by implementing tab switching logic by ourselves
-    JQ(".govuk-tabs__tab").click(function () {
-      let hash = JQ(this).data("href");
+    initAll({});
+    fixIDSKtabs();
+  });
+
+  /**
+   * workaround to fix routify incompatibility with IDSK tabs by implementing tab switching logic by ourselves
+   */
+  function fixIDSKtabs() {
+    function changeTab(tab) {
+      let hash = JQ(tab).data("href");
       JQ(hash).show();
-      // window.s = JQ(hash)
       JQ(hash)
         .parent()
         .find(".govuk-tabs__panel:not(" + hash + ")")
@@ -189,58 +225,85 @@
       JQ('[data-href="' + hash + '"]')
         .parent()
         .addClass("govuk-tabs__list-item--selected");
+    }
+    JQ(".govuk-tabs__tab").click(function () {
+      changeTab(this);
     });
-  });
+
+    JQ(".govuk-tabs__panel--hidden").hide();
+  }
+
+  let reload_graph = false;
 
   async function onFilterValueChange(
     selectedMunicipality,
     selectedCounty,
     selectedRegion
   ) {
-    let filter_type = "";
-    let filter_value = "";
+    let filter_type;
+    let filter_value;
 
-    if (selectedMunicipality != "") {
-      selectedLocalityLabel = lookup.municipalities[selectedMunicipality].name;
+    if (selectedMunicipality) {
       filter_type = "municipality";
       filter_value = selectedMunicipality;
-    } else if (selectedCounty != "") {
-      selectedLocalityLabel = lookup.counties[selectedCounty].name;
+    } else if (selectedCounty) {
       filter_type = "county";
       filter_value = selectedCounty;
-    } else if (selectedRegion != "") {
-      selectedLocalityLabel = lookup.regions[selectedRegion].name;
+    } else if (selectedRegion) {
       filter_type = "region";
       filter_value = selectedRegion;
     } else {
-      selectedLocalityLabel = "Celé Slovensko";
+      filter_type = "";
+      filter_value = "";
     }
 
-    if (filter_type != "") {
+    if (filter_type !== "") {
+
       // Get new nesults
       console.log("=======================================");
-      getResultsByLocality(filter_type, filter_value).then((res) => {
-        console.log("res from getResultsByLocality", res);
-        // partyResults = [...res[0].parties];
-        console.log("first party doc count", res[0].parties[0].doc_count);
-        // need to update partyResults from lookup
-        let synced = fillLookupDataToFilteredResults(res[0].parties);
-        console.log("first party doc count after update", synced[0].doc_count);
-        partyResults = [...synced];
-        console.log("partyResults new", synced);
-        // syncPartyResultsAndLookup();
-      });
+      partyResults = [];
+      let res = await getResultsByLocality(filter_type, filter_value);
+
+      console.log("res from getResultsByLocality", res);
+      // partyResults = [...res[0].parties];
+      console.log("first party doc count", res[0].parties[0].doc_count);
+      // need to update partyResults from lookup
+      let synced = fillLookupDataToFilteredResults(res[0].parties);
+      console.log("first party doc count after update", synced[0].doc_count);
+      partyResults = [...synced];
+      console.log("partyResults new", synced);
+      // syncPartyResultsAndLookup(partyResults, lookup);
+
+      electionsStatus = null; // show loading spinner
+      electionsStatus = await fetchElectionStatus(filter_type, filter_value);
     } else {
-      partyResults = await getPartyResults();
-      syncPartyResultsAndLookup();
+      setTimeout(()=>{
+        if (reload_graph == true) {
+          location.reload()
+        }
+        reload_graph = !reload_graph  // just change the value to different value to refresh, doesn't matter what the value
+        console.log("reload_graph", reload_graph)
+      }, 1000)
+
+      partyResults = [];
+      partyResults = await fetchPartyResults();
+      electionsStatus = null; // show loading spinner
+      electionsStatus = await fetchElectionStatus();
+      syncPartyResultsAndLookup(partyResults, lookup);
     }
   }
 
   $: onFilterValueChange(selectedMunicipality, selectedCounty, selectedRegion);
 
-  // On init sync info inside results and lookup for whole data
-  function syncPartyResultsAndLookup() {
-    console.log("syncPartyResultsAndLookup");
+  /**
+   * On init sync info inside results and lookup for whole data
+   */
+  function syncPartyResultsAndLookup(
+    partyResults: IPartyResult[],
+    lookup: ILookup
+  ) {
+    console.debug("syncPartyResultsAndLookup");
+
     partyResults.forEach((party, index) => {
       party.candidates.forEach((candidate, c_index) => {
         // Add whole object to results retrieved from elastic
@@ -259,7 +322,9 @@
     });
   }
 
-  // complete the newly fetched locality results by data from config
+  /**
+   * complete the newly fetched locality results by data from config
+   */
   function fillLookupDataToFilteredResults(results) {
     results.forEach((party, index) => {
       party.candidates.forEach((candidate, c_index) => {
@@ -276,36 +341,6 @@
       results[index] = { ...lookup.parties[party.id], ...party };
     });
     return results;
-  }
-
-  async function getElectionsStatus() {
-    const response = await axios.get(baseApiUrl("/elastic/elections-status"));
-    return response.data.data;
-  }
-
-  async function getPartyResults() {
-    const response = await axios
-      .post(baseApiUrl("/elastic/get-party-candidate-results"), {})
-      .catch(function (error) {
-        if (error.response) {
-          // Request made and server responded
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-        } else if (error.request) {
-          // The request was made but no response was received
-          console.log(error.request);
-        } else {
-          // Something happened in setting up the request that triggered an Error
-          console.log("Error", error.message);
-        }
-      });
-
-    if (response.data) {
-      return response.data;
-    } else {
-      return [];
-    }
   }
 
   async function getResultsByLocality(
@@ -327,120 +362,99 @@
   }
 </script>
 
-<div class="pt-5">
-  <h1 class="govuk-heading-xl mb-5">
-    Výsledky volieb - {selectedLocalityLabel}
-  </h1>
+<Modal bind:openModal={openErrorModal} isDismmisible={false}>
+  <span slot="title">Výsledky ešte neboli publikované</span>
+  <span slot="subtitle"
+    >Počkajte prosím do oficiálneho dátumu a času zverejnenia výsledkov a
+    načítajte stránku znovu</span
+  >
+</Modal>
 
-  <div class="row mb-3">
-    <div class="col-12 col-lg-4">
-      <div class="govuk-form-group mb-3">
-        <label class="govuk-label" for="region-select"> Kraj </label>
-        <select
-          class="govuk-select w-100"
-          bind:value={selectedRegion}
-          id="region-select"
-          on:change={() => {
-            resultsFilterStep = selectedRegion ? "county" : resultsFilterStep;
-            selectedCounty = "";
-            selectedMunicipality = "";
-          }}
-        >
-          <option value="">Celé Slovensko</option>
-          {#if config}
-            {#each config.regions as region}
-              <option value={region.code}>{region.name}</option>
-            {/each}
+<div class="refreshbtn" style="margin-top: 1rem;max-width: 200px">
+  <Button on:click={()=>location.reload()}>
+    Obnoviť
+  </Button>
+</div>
+
+
+{#if areResultsPublished == true}
+  <div class="pt-5">
+      <h1 class="govuk-heading-xl mb-5">
+        Výsledky volieb - {selectedLocalityLabel}
+      </h1>
+
+
+
+
+
+    {#if config}
+      <RegionSelector
+        REGIONS={config.regions}
+        COUNTRIES={config.counties}
+        MUNICIPALITIES={config.municipalities}
+        bind:selectedRegion
+        bind:selectedCounty
+        bind:selectedMunicipality
+        bind:selectedLocalityLabel
+      />
+    {/if}
+
+    <!--{#if !reload_graph}-->
+    <section class="parties-graph mb-5" bind:clientWidth={barChartWidth}>
+      <div class="govuk-tabs">
+        <ul class="govuk-tabs__list">
+          <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+            <a
+              class="govuk-tabs__tab"
+              data-href="#parties-tab-1"
+              href="javascript:void(0)"
+            >
+              Strany nad 5%
+            </a>
+          </li>
+          <li class="govuk-tabs__list-item">
+            <a
+              class="govuk-tabs__tab"
+              data-href="#parties-tab-2"
+              href="javascript:void(0)"
+            >
+              Všetky strany
+            </a>
+          </li>
+        </ul>
+        <div class="govuk-tabs__panel" id="parties-tab-1">
+          <h2 class="govuk-heading-m">Strany nad 5%</h2>
+          {#if partyResults.length === 0}
+            <LoadingOverlay />
           {/if}
-        </select>
-      </div>
-    </div>
-
-    <div class="col-12 col-lg-4">
-      <div class="govuk-form-group mb-3">
-        <label class="govuk-label" for="county-select"> Okres </label>
-        <select
-          bind:value={selectedCounty}
-          disabled={resultsFilterStep == "region" || null}
-          class="govuk-select w-100"
-          id="county-select"
-          on:change={() => {
-            resultsFilterStep = selectedCounty
-              ? "municipality"
-              : resultsFilterStep;
-            selectedMunicipality = "";
-          }}
+          <PartiesBarChart
+            {partyResults}
+            {barChartWidth}
+            chartType={"elected"}
+            {reload_graph}
+          />
+        </div>
+        <div
+          class="govuk-tabs__panel govuk-tabs__panel--hidden"
+          id="parties-tab-2"
         >
-          <option value="">Celý kraj</option>
-          {#if config && selectedRegion}
-            {#each config.counties.filter((c) => c.region_code == selectedRegion) as county}
-              <option value={county.code}>{county.name}</option>
-            {/each}
+          <h2 class="govuk-heading-m">Všetky strany</h2>
+          {#if partyResults.length === 0}
+            <LoadingOverlay />
           {/if}
-        </select>
+          <PartiesBarChart {partyResults} {barChartWidth} chartType={"all"} {reload_graph} />
+        </div>
       </div>
-    </div>
+    </section>
+    <!--{/if}-->
 
-    <div class="col-12 col-lg-4">
-      <div class="govuk-form-group mb-3">
-        <label class="govuk-label" for="numicipality-select"> Obec </label>
-        <select
-          disabled={resultsFilterStep == "region" ||
-            resultsFilterStep == "county" ||
-            null}
-          bind:value={selectedMunicipality}
-          class="govuk-select w-100"
-          id="numicipality-select"
-        >
-          <option value="">Celý okres</option>
-          {#if config && selectedCounty}
-            {#each config.municipalities.filter((m) => m.county_code == selectedCounty) as municipality}
-              <option value={municipality.code}>{municipality.name}</option>
-            {/each}
-          {/if}
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <div class="parties-graph mb-5">
-    <div class="govuk-tabs">
-      <ul class="govuk-tabs__list">
-        <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
-          <a
-            class="govuk-tabs__tab"
-            data-href="#parties-tab-1"
-            href="javascript:void(0)"
-          >
-            Strany nad 5%
-          </a>
-        </li>
-        <li class="govuk-tabs__list-item">
-          <a
-            class="govuk-tabs__tab"
-            data-href="#parties-tab-2"
-            href="javascript:void(0)"
-          >
-            Všetky strany
-          </a>
-        </li>
-      </ul>
-      <section class="govuk-tabs__panel" id="parties-tab-1">
-        <h2 class="govuk-heading-m">Strany nad 5%</h2>
-        <PartiesBarChart {partyResults} chartType={"elected"} />
-      </section>
-      <section
-        class="govuk-tabs__panel govuk-tabs__panel--hidden"
-        id="parties-tab-2"
-      >
-        <h2 class="govuk-heading-m">Všetky strany</h2>
-        <PartiesBarChart {partyResults} chartType={"all"} />
-      </section>
-    </div>
-  </div>
-
-  {#if resultsFilterStep == "region" && selectedRegion === ""}
-    <div class="partliament-graph mb-5">
+    <!--{#if resultsFilterStep === 'region' && selectedRegion === null}-->
+    <div
+      class="partliament-graph mb-5 {resultsFilterStep === 'region' &&
+      selectedRegion === null
+        ? ''
+        : 'd-none'}"
+    >
       <h2 class="govuk-heading-l text-center mb-3">Rozloženie parlamentu</h2>
       <div class="row">
         <div class="col-10 mx-auto" style="min-height: 300px;">
@@ -448,82 +462,89 @@
         </div>
       </div>
     </div>
-  {/if}
+    <!--{/if}-->
 
-  {#if resultsFilterStep == "region" && selectedRegion === ""}
-    <RegionalWinnersCards {lookup} {localityResultsRegions} />
-  {/if}
+    {#if resultsFilterStep === "region" && selectedRegion === null}
+      <RegionalWinnersCards {lookup} {localityResultsRegions} />
+    {/if}
 
-  {#if resultsFilterStep == "region" && selectedRegion === ""}
-    <div class="country-map mb-5">
-      <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
+    {#if resultsFilterStep === "region" && selectedRegion === null}
+      <div class="country-map mb-5">
+        <h2 class="govuk-heading-l text-center mb-3">Volebná mapa</h2>
 
-      <div class="govuk-tabs">
-        <ul class="govuk-tabs__list">
-          <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
-            <a
-              class="govuk-tabs__tab"
-              data-href="#map-tab-1"
-              href="javascript:void(0)"
-            >
-              Okresy
-            </a>
-          </li>
-          <li class="govuk-tabs__list-item">
-            <a
-              class="govuk-tabs__tab"
-              data-href="#map-tab-2"
-              href="javascript:void(0)"
-            >
-              Kraje
-            </a>
-          </li>
-        </ul>
-        <section class="govuk-tabs__panel" id="map-tab-1">
-          <h2 class="govuk-heading-m">Výsledky podľa okresov</h2>
-          <SlovakiaMap
-            mapType={"counties"}
-            {partiesInParliament}
-            {lookup}
-            localityResults={localityResultsCounties}
-            uniqueID={"2"}
-          />
-        </section>
-        <section
-          class="govuk-tabs__panel govuk-tabs__panel--hidden"
-          id="map-tab-2"
-        >
-          <h2 class="govuk-heading-m">Výsledky podľa krajov</h2>
-          <SlovakiaMap
-            mapType={"regions"}
-            {partiesInParliament}
-            {lookup}
-            localityResults={localityResultsRegions}
-            uniqueID={"1"}
-          />
-        </section>
+        <div class="govuk-tabs">
+          <ul class="govuk-tabs__list">
+            <li class="govuk-tabs__list-item govuk-tabs__list-item--selected">
+              <a
+                class="govuk-tabs__tab"
+                data-href="#map-tab-1"
+                href="javascript:void(0)"
+              >
+                Okresy
+              </a>
+            </li>
+            <li class="govuk-tabs__list-item">
+              <a
+                class="govuk-tabs__tab"
+                data-href="#map-tab-2"
+                href="javascript:void(0)"
+              >
+                Kraje
+              </a>
+            </li>
+          </ul>
+          <section class="govuk-tabs__panel" id="map-tab-1">
+            <h2 class="govuk-heading-m">Výsledky podľa okresov</h2>
+            <SlovakiaMap
+              mapType={"counties"}
+              {partiesInParliament}
+              {lookup}
+              localityResults={localityResultsCounties}
+              uniqueID={"2"}
+            />
+          </section>
+          <section
+            class="govuk-tabs__panel govuk-tabs__panel--hidden"
+            id="map-tab-2"
+          >
+            <h2 class="govuk-heading-m">Výsledky podľa krajov</h2>
+            <SlovakiaMap
+              mapType={"regions"}
+              {partiesInParliament}
+              {lookup}
+              localityResults={localityResultsRegions}
+              uniqueID={"1"}
+            />
+          </section>
+        </div>
       </div>
+    {/if}
+
+    <div class="elections-statistics mb-5">
+      <h2 class="govuk-heading-l text-center mb-3">Všeobecné štatistiky</h2>
+      <StatisticsTable {electionsStatus} />
     </div>
-  {/if}
 
-  <div class="elections-statistics mb-5">
-    <h2 class="govuk-heading-l text-center mb-3">Všeobecné štatistiky</h2>
-    <StatisticsTable {electionsStatus} />
-  </div>
+    <div class="parties-table mb-5">
+      <h2 class="govuk-heading-l text-center mb-3">Výsledky strán</h2>
+      <PartiesTable {partyResults} />
+    </div>
 
-  <div class="parties-table mb-5">
-    <h2 class="govuk-heading-l text-center mb-3">Výsledky strán</h2>
-    <PartiesTable {partyResults} />
+    <div class="candidates-table mb-5">
+      <h2 class="govuk-heading-l text-center mb-3">Poslanci</h2>
+      <CandidatesTable
+        data={candidates.sort((a, b) => b.doc_count - a.doc_count)}
+        {lookup}
+      />
+    </div>
   </div>
+{/if}
 
-  <div class="candidates-table mb-5">
-    <h2 class="govuk-heading-l text-center mb-3">Poslanci</h2>
-    <CandidatesTable
-      data={candidates.sort((a, b) => b.doc_count - a.doc_count)}
-      {lookup}
-    />
-  </div>
-</div>
 
 <style lang="scss">
+  .refreshbtn {
+    position: fixed;
+    bottom: 10px;
+    right: 20px;
+  }
 </style>
